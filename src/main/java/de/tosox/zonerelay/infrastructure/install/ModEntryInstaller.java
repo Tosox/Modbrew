@@ -80,16 +80,21 @@ public class ModEntryInstaller implements ModInstaller {
 		List<String> setup = mod.getSetup();
 		int total = setup.size();
 
-		for (int i = 0; i < total; i++) {
-			String instruction = setup.get(i);
-			Path source = tempDir.resolve(instruction);
-			Path destination = targetDir.resolve(source.getFileName());
+		try {
+			for (int i = 0; i < total; i++) {
+				String instruction = setup.get(i);
+				Path source = tempDir.resolve(instruction);
+				Path destination = targetDir.resolve(source.getFileName());
 
-			logManager.getUiLogger().info(localizer.translate("MSG_COPY_TO", instruction, source.getFileName()));
-			logManager.getFileLogger().info("Copying %s → %s", source, destination);
-			FileUtils.copyDirectory(source.toFile(), destination.toFile());
+				logManager.getUiLogger().info(localizer.translate("MSG_COPY_TO", instruction, source.getFileName()));
+				logManager.getFileLogger().info("Copying %s → %s", source, destination);
+				FileUtils.copyDirectory(source.toFile(), destination.toFile());
 
-			progressListener.onProgressUpdate(i + 1, total);
+				progressListener.onProgressUpdate(i + 1, total);
+			}
+		} finally {
+			logManager.getFileLogger().info("Cleaning up temp dir: %s", tempDir);
+			FileUtils.deleteDirectory(tempDir.toFile());
 		}
 
 		if (mod.getType() == EntryType.MOD) {
