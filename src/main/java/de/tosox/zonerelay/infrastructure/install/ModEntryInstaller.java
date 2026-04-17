@@ -70,17 +70,17 @@ public class ModEntryInstaller implements ModInstaller {
 		Path tempDir = paths.getTempDir().resolve(FilenameUtils.removeExtension(archive.getName()));
 		Files.createDirectories(tempDir);
 
-		logManager.getUiLogger().info(localizer.translate("MSG_EXTRACT_TO", tempDir));
-		logManager.getFileLogger().info("Extracting %s to %s", archive.getPath(), tempDir);
-		extractor.extract(archive, tempDir);
-
-		logManager.getUiLogger().info(localizer.translate("MSG_READ_SETUP"));
-		logManager.getFileLogger().info("Reading setup instructions");
-
-		List<String> setup = mod.getSetup();
-		int total = setup.size();
-
 		try {
+			logManager.getUiLogger().info(localizer.translate("MSG_EXTRACT_TO", tempDir));
+			logManager.getFileLogger().info("Extracting %s to %s", archive.getPath(), tempDir);
+			extractor.extract(archive, tempDir);
+
+			logManager.getUiLogger().info(localizer.translate("MSG_READ_SETUP"));
+			logManager.getFileLogger().info("Reading setup instructions");
+
+			List<String> setup = mod.getSetup();
+			int total = setup.size();
+
 			for (int i = 0; i < total; i++) {
 				String instruction = setup.get(i);
 				Path source = tempDir.resolve(instruction);
