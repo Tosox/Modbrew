@@ -31,6 +31,20 @@ public class FileLogger implements Logger {
 	}
 
 	@Override
+	public void debug(String message) {
+		if (shouldLog(LogLevel.DEBUG)) {
+			log("DEBUG", message);
+		}
+	}
+
+	@Override
+	public void debug(String msg, Object... args) {
+		if (shouldLog(LogLevel.DEBUG)) {
+			log("DEBUG", String.format(msg, args));
+		}
+	}
+
+	@Override
 	public void info(String message) {
 		if (shouldLog(LogLevel.INFO)) {
 			log("INFO", message);

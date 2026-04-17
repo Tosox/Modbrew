@@ -33,6 +33,12 @@ public class UILogger implements Logger {
 	}
 
 	@Override
+	public void debug(String message) {}
+
+	@Override
+	public void debug(String message, Object... args) {}
+
+	@Override
 	public void info(String message) {
 		append(message, new Color(0xC2C2C2));
 	}
