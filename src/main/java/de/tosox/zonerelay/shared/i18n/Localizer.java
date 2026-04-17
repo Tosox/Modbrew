@@ -50,7 +50,7 @@ public class Localizer {
 			return MessageFormat.format(message, args);
 		} catch (IllegalArgumentException e) {
 			logger.warn("Unable to format string for '%s' with '%s'", key, Arrays.toString(args));
-			return key;
+			return message;
 		}
 	}
 }
