@@ -1,30 +1,29 @@
 package de.tosox.zonerelay.shared.config;
 
+import lombok.Getter;
+
 import java.nio.file.Path;
 
-/**
- * All file-system paths used by the application, constructed from the working directory.
- * Injected as a singleton so no class needs to hardcode or compute paths independently.
- */
+@Getter
 public final class AppPaths {
-	public final Path mo2Dir;
-	public final Path modsDir;
-	public final Path profilesDir;
-	public final Path downloadsDir;
-	public final Path tempDir;
-	public final Path mo2Exe;
-	public final Path mo2Config;
-	public final Path modlistYaml;
-	public final Path modlistTxt;
-	public final Path modlistIcon;
-	public final Path modlistSplash;
-	public final Path profileFilesDir;
-	public final Path sevenZipExe;
-	public final Path addonMetaTemplate;
-	public final Path separatorMetaTemplate;
-	public final Path localesDir;
-	public final Path logsDir;
-	public final Path progressFile;
+	private final Path mo2Dir;
+	private final Path modsDir;
+	private final Path profilesDir;
+	private final Path downloadsDir;
+	private final Path tempDir;
+	private final Path mo2Exe;
+	private final Path mo2Config;
+	private final Path modlistYaml;
+	private final Path modlistTxt;
+	private final Path modlistIcon;
+	private final Path modlistSplash;
+	private final Path profileFilesDir;
+	private final Path sevenZipExe;
+	private final Path addonMetaTemplate;
+	private final Path separatorMetaTemplate;
+	private final Path localesDir;
+	private final Path logsDir;
+	private final Path progressFile;
 
 	private AppPaths(Path base) {
 		mo2Dir = base.resolve("../").normalize();

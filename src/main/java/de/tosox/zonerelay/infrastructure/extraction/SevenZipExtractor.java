@@ -21,7 +21,7 @@ public class SevenZipExtractor implements ArchiveExtractor {
 	@Inject
 	public SevenZipExtractor(@Named("file") Logger logger, AppPaths paths) {
 		this.logger = logger;
-		this.sevenZipPath = paths.sevenZipExe.toString();
+		this.sevenZipPath = paths.getSevenZipExe().toString();
 	}
 
 	@Override

@@ -23,8 +23,8 @@ public class IniMetaWriter implements MetaIniWriter {
 	@Inject
 	public IniMetaWriter(@Named("file") Logger logger, AppPaths paths) {
 		this.logger = logger;
-		this.addonMetaTemplate = paths.addonMetaTemplate;
-		this.separatorMetaTemplate = paths.separatorMetaTemplate;
+		this.addonMetaTemplate = paths.getAddonMetaTemplate();
+		this.separatorMetaTemplate = paths.getSeparatorMetaTemplate();
 	}
 
 	@Override

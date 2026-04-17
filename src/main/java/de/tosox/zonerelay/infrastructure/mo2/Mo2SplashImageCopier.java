@@ -21,11 +21,11 @@ public class Mo2SplashImageCopier implements SplashImageCopier {
 
 	@Override
 	public void copySplashImage() {
-		Path mo2DirSplash = paths.mo2Dir.resolve("splash.png");
+		Path mo2DirSplash = paths.getMo2Dir().resolve("splash.png");
 
-		if (Files.exists(paths.modlistSplash)) {
+		if (Files.exists(paths.getModlistSplash())) {
 			try {
-				Files.copy(paths.modlistSplash, mo2DirSplash, StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(paths.getModlistSplash(), mo2DirSplash, StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				throw new RuntimeException("Failed to copy splash image", e);
 			}

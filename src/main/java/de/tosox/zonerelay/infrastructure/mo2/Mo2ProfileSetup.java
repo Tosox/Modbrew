@@ -20,11 +20,11 @@ public class Mo2ProfileSetup implements ProfileSetup {
 
 	@Override
 	public void setupProfile(String profileName) {
-		Path newProfilePath = paths.profilesDir.resolve(profileName);
+		Path newProfilePath = paths.getProfilesDir().resolve(profileName);
 
 		try {
-			FileUtils.copyDirectory(paths.profileFilesDir.toFile(), newProfilePath.toFile());
-			FileUtils.copyFile(paths.modlistTxt.toFile(), newProfilePath.resolve("modlist.txt").toFile());
+			FileUtils.copyDirectory(paths.getProfileFilesDir().toFile(), newProfilePath.toFile());
+			FileUtils.copyFile(paths.getModlistTxt().toFile(), newProfilePath.resolve("modlist.txt").toFile());
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to setup MO2 profile", e);
 		}

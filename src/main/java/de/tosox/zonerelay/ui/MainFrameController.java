@@ -51,13 +51,13 @@ public class MainFrameController {
 			return;
 		}
 
-		if (Files.notExists(paths.mo2Exe)) {
+		if (Files.notExists(paths.getMo2Exe())) {
 			logManager.getUiLogger().warn(localizer.translate("ERR_INVALID_INSTALL_DIR"));
 			logManager.getFileLogger().warn("Please move the installer into the MO2 directory");
 			return;
 		}
 
-		if (Files.notExists(paths.mo2Config)) {
+		if (Files.notExists(paths.getMo2Config())) {
 			logManager.getUiLogger().warn(localizer.translate("ERR_LAUNCH_MO2"));
 			logManager.getFileLogger().warn("Please launch MO2 once first");
 			return;
@@ -68,7 +68,7 @@ public class MainFrameController {
 
 		ModlistConfig config;
 		try {
-			config = modlistRepository.load(paths.modlistYaml);
+			config = modlistRepository.load(paths.getModlistYaml());
 			modlistValidator.validate(config);
 		} catch (Exception e) {
 			logManager.getUiLogger().error(localizer.translate("ERR_CONFIG_INVALID"));
@@ -98,14 +98,14 @@ public class MainFrameController {
 	}
 
 	public void onLaunchClick() {
-		if (Files.notExists(paths.mo2Exe)) {
+		if (Files.notExists(paths.getMo2Exe())) {
 			logManager.getUiLogger().warn(localizer.translate("ERR_INVALID_INSTALL_DIR"));
 			logManager.getFileLogger().warn("Please move the installer into the MO2 directory");
 			return;
 		}
 
 		try {
-			Runtime.getRuntime().exec(paths.mo2Exe.toString(), null, paths.mo2Dir.toFile());
+			Runtime.getRuntime().exec(paths.getMo2Exe().toString(), null, paths.getMo2Dir().toFile());
 		} catch (IOException e) {
 			logManager.getUiLogger().error(localizer.translate("ERR_LAUNCH_MO2_FAIL"));
 			logManager.getFileLogger().error("Failed to launch MO2: " + e.getMessage());

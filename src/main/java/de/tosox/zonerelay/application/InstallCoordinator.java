@@ -137,7 +137,7 @@ public class InstallCoordinator {
 			File archive = null;
 			if (entry instanceof Mod mod) {
 				logManager.getUiLogger().info(localizer.translate("MSG_DOWNLOADING_ARCHIVE"));
-				archive = archiveDownloader.download(mod.getUrl(), paths.downloadsDir.toFile(), currentProgressListener);
+				archive = archiveDownloader.download(mod.getUrl(), paths.getDownloadsDir().toFile(), currentProgressListener);
 			}
 
 			ModInstaller installer = installers.stream()

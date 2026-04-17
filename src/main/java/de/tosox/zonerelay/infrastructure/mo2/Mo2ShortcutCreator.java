@@ -24,8 +24,8 @@ public class Mo2ShortcutCreator implements ShortcutCreator {
 			String desktopPath = System.getProperty("user.home") + "/Desktop";
 			Path shortcutPath = Path.of(desktopPath, shortcutName + ".lnk");
 
-			ShellLink.createLink(paths.mo2Exe.toAbsolutePath().normalize().toString())
-					.setIconLocation(paths.modlistIcon.toAbsolutePath().normalize().toString())
+			ShellLink.createLink(paths.getMo2Exe().toAbsolutePath().normalize().toString())
+					.setIconLocation(paths.getModlistIcon().toAbsolutePath().normalize().toString())
 					.saveTo(shortcutPath.toString());
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to create shortcut", e);

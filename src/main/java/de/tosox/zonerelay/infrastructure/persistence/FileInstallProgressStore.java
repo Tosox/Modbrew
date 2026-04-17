@@ -20,7 +20,7 @@ public class FileInstallProgressStore implements InstallProgressStore {
 	@Inject
 	public FileInstallProgressStore(@Named("file") Logger logger, AppPaths paths) {
 		this.logger = logger;
-		this.progressFile = paths.progressFile;
+		this.progressFile = paths.getProgressFile();
 	}
 
 	@Override

@@ -70,7 +70,7 @@ public class ApplicationModule extends AbstractModule {
 	@Provides
 	@Singleton
 	LogManager provideLogManager(JTextPane outputPane, AppPaths paths) {
-		return new LogManager(outputPane, paths.logsDir);
+		return new LogManager(outputPane, paths.getLogsDir());
 	}
 
 	@Provides
@@ -96,13 +96,13 @@ public class ApplicationModule extends AbstractModule {
 	@Provides
 	@Singleton
 	Localizer provideLocalizer(UserSettings settings, @Named("file") Logger logger, AppPaths paths) throws IOException {
-		return new Localizer(settings.getLanguage(), logger, paths.localesDir);
+		return new Localizer(settings.getLanguage(), logger, paths.getLocalesDir());
 	}
 
 	@Provides
 	@Singleton
 	Mo2ConfigReader provideMo2ConfigReader(AppPaths paths) {
-		return new Mo2ConfigReader(paths.mo2Config);
+		return new Mo2ConfigReader(paths.getMo2Config());
 	}
 
 	@Provides

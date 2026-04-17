@@ -56,7 +56,7 @@ public class ModEntryInstaller implements ModInstaller {
 
 		Path targetDir;
 		if (mod.getType() == EntryType.MOD) {
-			targetDir = paths.modsDir.resolve(mod.getName());
+			targetDir = paths.getModsDir().resolve(mod.getName());
 		} else {
 			targetDir = mo2ConfigReader.getGamePath();
 		}
@@ -67,7 +67,7 @@ public class ModEntryInstaller implements ModInstaller {
 			FileUtils.deleteDirectory(targetDir.toFile());
 		}
 
-		Path tempDir = paths.tempDir.resolve(FilenameUtils.removeExtension(archive.getName()));
+		Path tempDir = paths.getTempDir().resolve(FilenameUtils.removeExtension(archive.getName()));
 		Files.createDirectories(tempDir);
 
 		logManager.getUiLogger().info(localizer.translate("MSG_EXTRACT_TO", tempDir));
