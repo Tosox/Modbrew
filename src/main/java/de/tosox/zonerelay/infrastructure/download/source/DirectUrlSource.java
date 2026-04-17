@@ -3,7 +3,7 @@ package de.tosox.zonerelay.infrastructure.download.source;
 public class DirectUrlSource implements UrlSource {
 	@Override
 	public boolean supports(String url) {
-		return true; // fallback: supports any URL
+		return true;
 	}
 
 	@Override
