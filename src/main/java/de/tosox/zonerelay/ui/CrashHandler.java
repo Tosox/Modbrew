@@ -18,9 +18,9 @@ public class CrashHandler {
 		this.logger = logger;
 	}
 
-	public void fatal(String message, Exception e) {
+	public void fatal(String message, Exception exception) {
 		StringWriter stringWriter = new StringWriter();
-		e.printStackTrace(new PrintWriter(stringWriter));
+		exception.printStackTrace(new PrintWriter(stringWriter));
 
 		logger.error("%s%n%s", message, stringWriter);
 		System.err.printf("[FATAL] %s%n%s%n", message, stringWriter);
@@ -31,7 +31,9 @@ public class CrashHandler {
 			} else {
 				SwingUtilities.invokeAndWait(() -> showDialog(message));
 			}
-		} catch (Exception ignored) {}
+		} catch (Exception e) {
+			System.err.printf("[FATAL] Failed to show error dialog: %s%n", e.getMessage());
+		}
 
 		System.exit(1);
 	}
