@@ -24,6 +24,6 @@ public class Mod extends ModEntry {
 	protected Mod(String id, EntryType type, String name, String url, List<String> setup) {
 		super(id, type, name);
 		this.url = url;
-		this.setup = setup;
+		this.setup = setup != null ? setup : List.of();
 	}
 }
