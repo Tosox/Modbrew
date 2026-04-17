@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 
 public class JImagePanel extends JPanel {
 	private final BufferedImage image;
+	private Image scaledImage;
+	private int lastWidth = -1;
+	private int lastHeight = -1;
 
 	public JImagePanel(BufferedImage image) {
 		this.image = image;
@@ -20,6 +23,13 @@ public class JImagePanel extends JPanel {
 	}
 
 	private Image getScaledToBoundsInstance() {
-		return image.getScaledInstance(this.getWidth(), this.getHeight(), Image.SCALE_SMOOTH);
+		int w = getWidth();
+		int h = getHeight();
+		if (scaledImage == null || w != lastWidth || h != lastHeight) {
+			scaledImage = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+			lastWidth = w;
+			lastHeight = h;
+		}
+		return scaledImage;
 	}
 }
