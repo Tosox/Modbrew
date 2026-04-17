@@ -58,7 +58,7 @@ public class FilenameResolver {
 				return fileName;
 			}
 		}
-		logger.info("No valid Content-Disposition header found");
+		logger.debug("No valid Content-Disposition header found");
 		return null;
 	}
 
