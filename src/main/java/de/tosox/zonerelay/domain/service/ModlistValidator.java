@@ -13,6 +13,13 @@ import java.util.Set;
 
 public class ModlistValidator {
 	public void validate(ModlistConfig config) {
+		if (config.getProfileName() == null || config.getProfileName().isBlank()) {
+			throw new IllegalArgumentException("modlist.yaml is missing 'profileName'");
+		}
+		if (config.getShortcutName() == null || config.getShortcutName().isBlank()) {
+			throw new IllegalArgumentException("modlist.yaml is missing 'shortcutName'");
+		}
+
 		Set<String> seenIds = new HashSet<>();
 
 		validateEntries(config.getMods(), seenIds);
