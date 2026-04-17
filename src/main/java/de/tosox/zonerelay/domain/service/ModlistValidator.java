@@ -6,7 +6,8 @@ import de.tosox.zonerelay.domain.model.ModlistConfig;
 import de.tosox.zonerelay.domain.model.Separator;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,9 +63,11 @@ public class ModlistValidator {
 		if (urlString == null || urlString.isBlank()) {
 			throw new IllegalArgumentException("Entry with id '" + id + "' is missing a URL");
 		}
+
 		try {
-			new URL(urlString);
-		} catch (MalformedURLException e) {
+			//noinspection ResultOfMethodCallIgnored
+			new URI(urlString).toURL();
+		} catch (URISyntaxException | MalformedURLException e) {
 			throw new IllegalArgumentException("Entry with id '" + id + "' has invalid URL: " + urlString);
 		}
 	}
