@@ -18,7 +18,7 @@
   "MSG_CREATE_SEPARATOR": "    Creating separator in {0}",
   "MSG_GENERATE_META": "    Generating meta.ini file",
   "MSG_ADDON_ALREADY_DOWNLOADED": "    Addon already downloaded, using cached version",
-  "MSG_ADDON_DELETE_OLD_VERSION": "    Deleting content of the previous version",
+  "MSG_ADDON_DELETE_OLD_VERSION": "    Deleting contents of the previous version",
   "MSG_DOWNLOADING_ARCHIVE": "    Downloading archive...",
   "MSG_DOWNLOADING_TO": "    Downloading {0}",
   "MSG_READ_SETUP" : "    Reading setup instructions",
