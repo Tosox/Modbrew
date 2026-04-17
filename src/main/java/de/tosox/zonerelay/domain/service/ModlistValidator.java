@@ -29,8 +29,6 @@ public class ModlistValidator {
 	}
 
 	private void validateEntries(List<? extends ModEntry> entries, Set<String> seenIds) {
-		if (entries == null) return;
-
 		for (ModEntry entry : entries) {
 			validateEntry(entry, seenIds);
 		}
