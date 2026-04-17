@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import de.tosox.zonerelay.shared.logging.Logger;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -18,13 +17,14 @@ import java.util.regex.Pattern;
 public class FilenameResolver {
 	private static final Pattern FILENAME_FROM_CONTENT_DISPOSITION =
 			Pattern.compile("filename\\*?=['\"]?(?:UTF-\\d['\"]*)?([^;\"']*)['\"]?;?");
-	private static final OkHttpClient CLIENT = new OkHttpClient();
 
 	private final Logger logger;
+	private final HttpClient httpClient;
 
 	@Inject
-	public FilenameResolver(@Named("file") Logger logger) {
+	public FilenameResolver(@Named("file") Logger logger, HttpClient httpClient) {
 		this.logger = logger;
+		this.httpClient = httpClient;
 	}
 
 	public String resolve(String directUrl) {
@@ -39,10 +39,9 @@ public class FilenameResolver {
 		Request request = new Request.Builder()
 				.url(url)
 				.head()
-				.header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
 				.build();
 
-		try (Response response = CLIENT.newCall(request).execute()) {
+		try (Response response = httpClient.execute(request)) {
 			String fromHeader = extractFromContentDisposition(response);
 			if (fromHeader != null) {
 				return fromHeader;

@@ -3,11 +3,10 @@ package de.tosox.zonerelay.infrastructure.download.source;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import de.tosox.zonerelay.infrastructure.download.HttpClient;
 import de.tosox.zonerelay.shared.logging.Logger;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,16 +15,16 @@ import java.io.IOException;
 
 @Singleton
 public class ModDbUrlSource implements UrlSource {
-	private static final OkHttpClient CLIENT = new OkHttpClient();
 	private static final String MODDB_HOST = "moddb.com";
-	private static final String MODDB_BASE = "https://moddb.com/";
-	private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux i686; rv:57.0) Gecko/20100101 Firefox/57.0";
+	private static final String MODDB_BASE = "https://www.moddb.com";
 
 	private final Logger logger;
+	private final HttpClient httpClient;
 
 	@Inject
-	public ModDbUrlSource(@Named("file") Logger logger) {
+	public ModDbUrlSource(@Named("file") Logger logger, HttpClient httpClient) {
 		this.logger = logger;
+		this.httpClient = httpClient;
 	}
 
 	@Override
@@ -47,7 +46,8 @@ public class ModDbUrlSource implements UrlSource {
 			String downloadPageUrl = MODDB_BASE + relDownloadUrl;
 			Document downloadPage = fetchPage(downloadPageUrl);
 
-			Element downloadLinkElement = downloadPage.selectFirst("a[href]");
+			// TODO: Resolve best mirror
+			Element downloadLinkElement = downloadPage.selectFirst("p a:first-child");
 			if (downloadLinkElement == null) {
 				logger.error("Download link not found on ModDB download page.");
 				return null;
@@ -64,20 +64,14 @@ public class ModDbUrlSource implements UrlSource {
 	private Document fetchPage(String url) throws IOException {
 		Request request = new Request.Builder()
 				.url(url)
-				.header("User-Agent", USER_AGENT)
 				.build();
 
-		try (Response response = CLIENT.newCall(request).execute()) {
+		try (Response response = httpClient.execute(request)) {
 			if (!response.isSuccessful()) {
 				throw new IOException("Failed to load page: " + url + " (Status code: " + response.code() + ")");
 			}
 
-			ResponseBody body = response.body();
-			if (body == null) {
-				throw new IOException("Empty response body for URL: " + url);
-			}
-
-			return Jsoup.parse(body.string());
+			return Jsoup.parse(response.body().string());
 		}
 	}
 }
