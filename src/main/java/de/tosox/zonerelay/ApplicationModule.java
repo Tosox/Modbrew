@@ -52,7 +52,8 @@ public class ApplicationModule extends AbstractModule {
 	@Provides
 	@Singleton
 	List<UrlSource> provideUrlSources(ModDbUrlSource modDb) {
-		return List.of(modDb, new DirectUrlSource()); // specific first, fallback last
+		// NOTE: Specific first, fallback last
+		return List.of(modDb, new DirectUrlSource());
 	}
 
 	@Provides
