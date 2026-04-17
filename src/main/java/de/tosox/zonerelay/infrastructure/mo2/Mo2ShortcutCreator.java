@@ -6,6 +6,7 @@ import de.tosox.zonerelay.domain.port.ShortcutCreator;
 import de.tosox.zonerelay.shared.config.AppPaths;
 import mslinks.ShellLink;
 
+import javax.swing.filechooser.FileSystemView;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -21,7 +22,7 @@ public class Mo2ShortcutCreator implements ShortcutCreator {
 	@Override
 	public void createShortcut(String shortcutName) {
 		try {
-			String desktopPath = System.getProperty("user.home") + "/Desktop";
+			String desktopPath = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
 			Path shortcutPath = Path.of(desktopPath, shortcutName + ".lnk");
 
 			ShellLink.createLink(paths.getMo2Exe().toAbsolutePath().normalize().toString())
