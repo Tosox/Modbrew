@@ -60,22 +60,26 @@ public class MainFrame extends JFrame {
 	}
 
 	public void setCurrentProgress(int value) {
-		if (pgbCurrent.isIndeterminate()) {
-			pgbCurrent.setIndeterminate(false);
-			pgbCurrent.setString(null);
-		}
-		pgbCurrent.setValue(value);
+		SwingUtilities.invokeLater(() -> {
+			if (pgbCurrent.isIndeterminate()) {
+				pgbCurrent.setIndeterminate(false);
+				pgbCurrent.setString(null);
+			}
+			pgbCurrent.setValue(value);
+		});
 	}
 
 	public void setCurrentProgressIndeterminate() {
-		if (!pgbCurrent.isIndeterminate()) {
-			pgbCurrent.setIndeterminate(true);
-			pgbCurrent.setString(localizer.translate("GUI_DOWNLOADING"));
-		}
+		SwingUtilities.invokeLater(() -> {
+			if (!pgbCurrent.isIndeterminate()) {
+				pgbCurrent.setIndeterminate(true);
+				pgbCurrent.setString(localizer.translate("GUI_DOWNLOADING"));
+			}
+		});
 	}
 
 	public void setTotalProgress(int value) {
-		pgbTotal.setValue(value);
+		SwingUtilities.invokeLater(() -> pgbTotal.setValue(value));
 	}
 
 	/**
