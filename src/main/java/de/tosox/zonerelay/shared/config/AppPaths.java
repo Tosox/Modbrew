@@ -24,6 +24,7 @@ public final class AppPaths {
 	private final Path localesDir;
 	private final Path logsDir;
 	private final Path progressFile;
+	private final Path userConfig;
 
 	private AppPaths(Path base) {
 		mo2Dir = base.resolve("../").normalize();
@@ -44,6 +45,7 @@ public final class AppPaths {
 		localesDir = base.resolve("locales");
 		logsDir = base.resolve("logs");
 		progressFile = base.resolve("install_progress.dat");
+		userConfig = base.resolve("user_config.yaml");
 	}
 
 	public static AppPaths fromBase(Path baseDir) {

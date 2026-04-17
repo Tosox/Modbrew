@@ -1,26 +1,45 @@
 package de.tosox.zonerelay.shared.config;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.tosox.zonerelay.shared.logging.LogLevel;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;
 
 @Getter
-@Setter
 public class UserSettings {
 	private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+	private static final String DEFAULT_LANGUAGE = "en-US";
+	private static final LogLevel DEFAULT_LOGLEVEL = LogLevel.INFO;
 
-	private String language = "en-US";
+	private final String language;
+	private final LogLevel logLevel;
 
-	// TODO: Actually use the user settings
+	public UserSettings() {
+		this.language = DEFAULT_LANGUAGE;
+		this.logLevel = DEFAULT_LOGLEVEL;
+	}
+
+	@JsonCreator
+	public UserSettings(
+			@JsonProperty("language") String language,
+			@JsonProperty("logLevel") LogLevel logLevel) {
+		this.language = language != null ? language : DEFAULT_LANGUAGE;
+		this.logLevel = logLevel != null ? logLevel : DEFAULT_LOGLEVEL;
+	}
+
 	public static UserSettings load(File file) {
+		if (!file.exists()) {
+			UserSettings defaults = new UserSettings();
+			defaults.save(file);
+			return defaults;
+		}
+
 		try {
-			if (!file.exists()) {
-				return new UserSettings();
-			}
 			return MAPPER.readValue(file, UserSettings.class);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load user settings", e);

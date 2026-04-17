@@ -24,7 +24,6 @@ import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.ui.util.ImageLoader;
 
 import javax.swing.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -70,8 +69,8 @@ public class ApplicationModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	LogManager provideLogManager(JTextPane outputPane, AppPaths paths) {
-		return new LogManager(outputPane, paths.getLogsDir());
+	LogManager provideLogManager(JTextPane outputPane, AppPaths paths, UserSettings settings) {
+		return new LogManager(outputPane, paths.getLogsDir(), settings.getLogLevel());
 	}
 
 	@Provides
@@ -90,8 +89,8 @@ public class ApplicationModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	UserSettings provideUserSettings() {
-		return UserSettings.load(new File("user_config.yaml"));
+	UserSettings provideUserSettings(AppPaths paths) {
+		return UserSettings.load(paths.getUserConfig().toFile());
 	}
 
 	@Provides
