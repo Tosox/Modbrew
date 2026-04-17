@@ -7,14 +7,13 @@ import de.tosox.zonerelay.domain.model.Mod;
 import de.tosox.zonerelay.domain.model.ModEntry;
 import de.tosox.zonerelay.domain.model.ModlistConfig;
 import de.tosox.zonerelay.domain.port.*;
+import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.shared.i18n.Localizer;
 import de.tosox.zonerelay.shared.logging.LogManager;
-import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.shared.progress.ProgressListener;
 import lombok.Setter;
 
 import java.io.File;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,6 +92,7 @@ public class InstallCoordinator {
 		logManager.getUiLogger().info(localizer.translate("MSG_INSTALLATION_MO2_SETUP"));
 		logManager.getUiLogger().info("=================================================================");
 		setupMo2Environment(config);
+		totalProgressListener.onProgressUpdate(completedMods.incrementAndGet(), totalMods);
 
 		logManager.getUiLogger().info("\n=================================================================");
 		logManager.getUiLogger().info(localizer.translate("MSG_INSTALLATION_CLEANUP"));
@@ -103,7 +103,6 @@ public class InstallCoordinator {
 		logManager.getFileLogger().info("Installation completed successfully");
 
 		currentProgressListener.onProgressUpdate(1, 1);
-		totalProgressListener.onProgressUpdate(1, 1);
 	}
 
 	private void installEntries(List<? extends ModEntry> entries, boolean fullInstall,
@@ -112,12 +111,6 @@ public class InstallCoordinator {
 		if (entries == null || entries.isEmpty()) {
 			return;
 		}
-
-		entries.sort(Comparator.comparingInt((ModEntry e) -> switch (e.getType()) {
-			case MOD -> 0;
-			case PATCH -> 1;
-			case SEPARATOR -> 2;
-		}));
 
 		for (ModEntry entry : entries) {
 			if (!resumePointFound.get()) {
@@ -156,9 +149,6 @@ public class InstallCoordinator {
 		logManager.getUiLogger().info(localizer.translate("MSG_CREATE_CUSTOM_PROFILE"));
 		logManager.getFileLogger().info("Setting up MO2 profile");
 		profileSetup.setupProfile(config.getProfileName());
-
-		logManager.getUiLogger().info(localizer.translate("MSG_COPY", "modlist.txt"));
-		logManager.getFileLogger().info("Copying modlist.txt to profile");
 
 		logManager.getUiLogger().info(localizer.translate("MSG_COPY", "splash.png"));
 		logManager.getFileLogger().info("Copying splash image");
