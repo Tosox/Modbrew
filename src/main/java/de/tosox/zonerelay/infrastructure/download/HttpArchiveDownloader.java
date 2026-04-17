@@ -11,6 +11,7 @@ import de.tosox.zonerelay.shared.progress.ProgressListener;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,6 +66,9 @@ public class HttpArchiveDownloader implements ArchiveDownloader {
 					outputStream.write(buffer, 0, bytesRead);
 				}
 			}
+		} catch (Exception e) {
+			FileUtils.deleteQuietly(archive);
+			throw e;
 		}
 
 		logger.info("Downloaded to %s", archive.getPath());
