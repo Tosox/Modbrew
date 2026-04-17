@@ -89,12 +89,7 @@ public class MainFrameController {
 
 		String resumeFromId = promptForResume(config);
 
-		try {
-			installCoordinator.startInstallation(config, mainFrame.isFullInstallSelected(), resumeFromId);
-		} catch (Exception e) {
-			logManager.getUiLogger().error(localizer.translate("ERR_INSTALLATION_FAILED"));
-			logManager.getFileLogger().error("Installation failed: " + e.getMessage());
-		}
+		installCoordinator.startInstallation(config, mainFrame.isFullInstallSelected(), resumeFromId);
 	}
 
 	public void onLaunchClick() {
