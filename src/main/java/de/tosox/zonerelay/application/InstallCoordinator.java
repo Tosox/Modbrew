@@ -66,8 +66,8 @@ public class InstallCoordinator {
 			try {
 				runInstallation(config, fullInstall, resumeFromId);
 			} catch (Exception e) {
-				fileLogger.error("Installation failed: %s", e.getMessage());
-				uiLogger.error(localizer.translate("ERR_INSTALLATION_FAILED", e.getMessage()));
+				fileLogger.error("Installation failed", e);
+				uiLogger.error(localizer.translate("ERR_INSTALLATION_FAILED", e.toString()));
 			} finally {
 				isInstalling.set(false);
 			}

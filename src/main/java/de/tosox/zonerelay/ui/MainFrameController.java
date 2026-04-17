@@ -86,8 +86,8 @@ public class MainFrameController {
 			config = modlistRepository.load(paths.getModlistYaml());
 			modlistValidator.validate(config);
 		} catch (Exception e) {
-			uiLogger.error(localizer.translate("ERR_CONFIG_INVALID", e.getMessage()));
-			fileLogger.error("Failed to load or validate config: " + e.getMessage());
+			uiLogger.error(localizer.translate("ERR_CONFIG_INVALID"));
+			fileLogger.error("Failed to load or validate config", e);
 			return;
 		}
 
