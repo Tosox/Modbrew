@@ -7,8 +7,8 @@ import java.awt.image.BufferedImage;
 public class JImagePanel extends JPanel {
 	private final BufferedImage image;
 
-	public JImagePanel(Image image) {
-		this.image = (BufferedImage) image;
+	public JImagePanel(BufferedImage image) {
+		this.image = image;
 	}
 
 	@Override
