@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import de.tosox.zonerelay.infrastructure.mo2.Mo2ConfigReader;
 import de.tosox.zonerelay.shared.config.UserSettings;
+import de.tosox.zonerelay.infrastructure.config.UserSettingsManager;
 import de.tosox.zonerelay.domain.port.*;
 import de.tosox.zonerelay.infrastructure.download.HttpArchiveDownloader;
 import de.tosox.zonerelay.infrastructure.download.source.DirectUrlSource;
@@ -69,6 +70,18 @@ public class ApplicationModule extends AbstractModule {
 
 	@Provides
 	@Singleton
+	UserSettingsManager provideUserSettingsManager(AppPaths paths) {
+		return new UserSettingsManager(paths.getUserConfig().toFile());
+	}
+
+	@Provides
+	@Singleton
+	UserSettings provideUserSettings(UserSettingsManager manager) {
+		return manager.getCurrent();
+	}
+
+	@Provides
+	@Singleton
 	LogManager provideLogManager(JTextPane outputPane, AppPaths paths, UserSettings settings) {
 		return new LogManager(outputPane, paths.getLogsDir(), settings.getLogLevel());
 	}
@@ -85,12 +98,6 @@ public class ApplicationModule extends AbstractModule {
 	@Singleton
 	Logger provideUiLogger(LogManager logManager) {
 		return logManager.getUiLogger();
-	}
-
-	@Provides
-	@Singleton
-	UserSettings provideUserSettings(AppPaths paths) {
-		return UserSettings.load(paths.getUserConfig().toFile());
 	}
 
 	@Provides
