@@ -11,24 +11,25 @@ import java.io.IOException;
 @Getter
 @Setter
 public class UserSettings {
+	private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+
 	private String language = "en-US";
 
+	// TODO: Actually use the user settings
 	public static UserSettings load(File file) {
-		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		try {
 			if (!file.exists()) {
 				return new UserSettings();
 			}
-			return mapper.readValue(file, UserSettings.class);
+			return MAPPER.readValue(file, UserSettings.class);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load user settings", e);
 		}
 	}
 
 	public void save(File file) {
-		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		try {
-			mapper.writerWithDefaultPrettyPrinter().writeValue(file, this);
+			MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, this);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to save user settings", e);
 		}
