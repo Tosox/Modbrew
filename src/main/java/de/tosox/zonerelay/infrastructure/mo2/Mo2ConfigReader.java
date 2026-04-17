@@ -25,7 +25,10 @@ public class Mo2ConfigReader {
 				throw new IOException("gamePath not found in MO2 configuration");
 			}
 
-			return Paths.get(gamePath.replace("@ByteArray(", "").replace(")", ""));
+			if (gamePath.startsWith("@ByteArray(") && gamePath.endsWith(")")) {
+				gamePath = gamePath.substring("@ByteArray(".length(), gamePath.length() - 1);
+			}
+			return Paths.get(gamePath);
 		}
 	}
 }
