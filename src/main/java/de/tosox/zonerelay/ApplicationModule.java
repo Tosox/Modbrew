@@ -7,7 +7,7 @@ import com.google.inject.name.Named;
 import de.tosox.zonerelay.infrastructure.mo2.Mo2ConfigReader;
 import de.tosox.zonerelay.shared.config.UserSettings;
 import de.tosox.zonerelay.domain.port.*;
-import de.tosox.zonerelay.infrastructure.download.OkHttpArchiveDownloader;
+import de.tosox.zonerelay.infrastructure.download.HttpArchiveDownloader;
 import de.tosox.zonerelay.infrastructure.download.source.DirectUrlSource;
 import de.tosox.zonerelay.infrastructure.download.source.ModDbUrlSource;
 import de.tosox.zonerelay.infrastructure.download.source.UrlSource;
@@ -33,7 +33,7 @@ public class ApplicationModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(ArchiveDownloader.class).to(OkHttpArchiveDownloader.class);
+		bind(ArchiveDownloader.class).to(HttpArchiveDownloader.class);
 		bind(ArchiveExtractor.class).to(SevenZipExtractor.class);
 		bind(InstallProgressStore.class).to(FileInstallProgressStore.class);
 		bind(MetaIniWriter.class).to(IniMetaWriter.class);

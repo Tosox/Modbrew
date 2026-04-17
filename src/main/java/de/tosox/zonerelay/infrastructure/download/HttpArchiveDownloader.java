@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Singleton
-public class OkHttpArchiveDownloader implements ArchiveDownloader {
+public class HttpArchiveDownloader implements ArchiveDownloader {
 	private static final OkHttpClient CLIENT = new OkHttpClient();
 	private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux i686; rv:57.0) Gecko/20100101 Firefox/57.0";
 
@@ -28,8 +28,8 @@ public class OkHttpArchiveDownloader implements ArchiveDownloader {
 	private final FilenameResolver filenameResolver;
 
 	@Inject
-	public OkHttpArchiveDownloader(@Named("file") Logger logger, List<UrlSource> urlSources,
-	                               FilenameResolver filenameResolver) {
+	public HttpArchiveDownloader(@Named("file") Logger logger, List<UrlSource> urlSources,
+	                             FilenameResolver filenameResolver) {
 		this.logger = logger;
 		this.urlSources = urlSources;
 		this.filenameResolver = filenameResolver;
