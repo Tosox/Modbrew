@@ -59,13 +59,13 @@ public class InstallCoordinator {
 	}
 
 	public void startInstallation(ModlistConfig config, boolean fullInstall, String resumeFromId) {
+		isInstalling.set(true);
 		Thread thread = new Thread(() -> {
-			isInstalling.set(true);
 			try {
 				runInstallation(config, fullInstall, resumeFromId);
 			} catch (Exception e) {
 				fileLogger.error("Installation failed: %s", e.getMessage());
-				throw new RuntimeException(e);
+				uiLogger.error(localizer.translate("ERR_INSTALLATION_FAILED", e.getMessage()));
 			} finally {
 				isInstalling.set(false);
 			}
@@ -81,6 +81,7 @@ public class InstallCoordinator {
 		currentProgressListener.onProgressUpdate(0, 1);
 		totalProgressListener.onProgressUpdate(0, 1);
 
+		// NOTE: "+ 1" to count in the separator installation, profile setup and workspace cleanup
 		int totalMods = config.getMods().size() + config.getPatches().size() + 1;
 		AtomicInteger completedMods = new AtomicInteger(0);
 		AtomicBoolean resumePointFound = new AtomicBoolean(resumeFromId == null);
