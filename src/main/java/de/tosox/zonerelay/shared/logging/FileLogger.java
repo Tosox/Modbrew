@@ -3,6 +3,7 @@ package de.tosox.zonerelay.shared.logging;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -83,6 +84,15 @@ public class FileLogger implements Logger {
 	public void error(String msg, Object... args) {
 		if (shouldLog(LogLevel.ERROR)) {
 			log("ERROR", String.format(msg, args));
+		}
+	}
+
+	@Override
+	public void error(String message, Exception e) {
+		if (shouldLog(LogLevel.ERROR)) {
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			log("ERROR", message + System.lineSeparator() + sw);
 		}
 	}
 }

@@ -63,4 +63,9 @@ public class UILogger implements Logger {
 	public void error(String message, Object... args) {
 		error(String.format(message, args));
 	}
+
+	@Override
+	public void error(String message, Exception e) {
+		error(message);
+	}
 }
