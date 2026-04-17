@@ -2,6 +2,7 @@ package de.tosox.zonerelay;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import de.tosox.zonerelay.ui.CrashHandler;
 import de.tosox.zonerelay.ui.MainFrame;
 import de.tosox.zonerelay.shared.i18n.Localizer;
 import de.tosox.zonerelay.shared.logging.LogManager;
@@ -11,6 +12,11 @@ public class Application {
 
 	public Application() {
 		Injector injector = Guice.createInjector(new ApplicationModule());
+		CrashHandler crashHandler = injector.getInstance(CrashHandler.class);
+		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
+				crashHandler.fatal("Unexpected error in thread: " + thread.getName(),
+						throwable instanceof Exception ex ? ex : new RuntimeException(throwable)));
+
 		this.mainFrame = injector.getInstance(MainFrame.class);
 
 		LogManager logManager = injector.getInstance(LogManager.class);

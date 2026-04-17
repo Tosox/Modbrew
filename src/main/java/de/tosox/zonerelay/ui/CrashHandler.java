@@ -22,15 +22,21 @@ public class CrashHandler {
 		StringWriter stringWriter = new StringWriter();
 		e.printStackTrace(new PrintWriter(stringWriter));
 
-		logger.error(message, stringWriter);
+		logger.error("%s%n%s", message, stringWriter);
+		System.err.printf("[FATAL] %s%n%s%n", message, stringWriter);
 
-		JOptionPane.showMessageDialog(
-				null,
-				message,
-				"Error",
-				JOptionPane.ERROR_MESSAGE
-		);
+		try {
+			if (SwingUtilities.isEventDispatchThread()) {
+				showDialog(message);
+			} else {
+				SwingUtilities.invokeAndWait(() -> showDialog(message));
+			}
+		} catch (Exception ignored) {}
 
 		System.exit(1);
+	}
+
+	private void showDialog(String message) {
+		JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 }

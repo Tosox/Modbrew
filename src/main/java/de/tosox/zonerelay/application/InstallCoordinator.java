@@ -61,8 +61,8 @@ public class InstallCoordinator {
 			try {
 				runInstallation(config, fullInstall, resumeFromId);
 			} catch (Exception e) {
-				logManager.getFileLogger().error("Failed to install mods: %s", e.getMessage());
-				throw new RuntimeException("Failed to install mods", e);
+				logManager.getFileLogger().error("Installation failed: %s", e.getMessage());
+				throw new RuntimeException(e);
 			} finally {
 				isInstalling.set(false);
 			}
