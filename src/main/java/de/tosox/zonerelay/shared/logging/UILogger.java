@@ -33,17 +33,32 @@ public class UILogger implements Logger {
 	}
 
 	@Override
+	public void info(String message) {
+		append(message, new Color(0xC2C2C2));
+	}
+
+	@Override
 	public void info(String message, Object... args) {
-		append(String.format(message, args), new Color(0xC2, 0xC2, 0xC2));
+		info(String.format(message, args));
+	}
+
+	@Override
+	public void warn(String message) {
+		append(message, new Color(0xFFCC00));
 	}
 
 	@Override
 	public void warn(String message, Object... args) {
-		append(String.format(message, args), new Color(0xFFCC00));
+		warn(String.format(message, args));
+	}
+
+	@Override
+	public void error(String message) {
+		append(message, new Color(0xFF4444));
 	}
 
 	@Override
 	public void error(String message, Object... args) {
-		append(String.format(message, args), new Color(0xFF4444));
+		error(String.format(message, args));
 	}
 }

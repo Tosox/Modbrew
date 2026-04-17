@@ -31,6 +31,13 @@ public class FileLogger implements Logger {
 	}
 
 	@Override
+	public void info(String message) {
+		if (shouldLog(LogLevel.INFO)) {
+			log("INFO", message);
+		}
+	}
+
+	@Override
 	public void info(String msg, Object... args) {
 		if (shouldLog(LogLevel.INFO)) {
 			log("INFO", String.format(msg, args));
@@ -38,9 +45,23 @@ public class FileLogger implements Logger {
 	}
 
 	@Override
+	public void warn(String message) {
+		if (shouldLog(LogLevel.WARN)) {
+			log("WARN", message);
+		}
+	}
+
+	@Override
 	public void warn(String msg, Object... args) {
 		if (shouldLog(LogLevel.WARN)) {
 			log("WARN", String.format(msg, args));
+		}
+	}
+
+	@Override
+	public void error(String message) {
+		if (shouldLog(LogLevel.ERROR)) {
+			log("ERROR", message);
 		}
 	}
 
