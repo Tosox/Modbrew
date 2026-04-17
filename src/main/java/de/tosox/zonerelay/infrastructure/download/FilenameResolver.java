@@ -8,8 +8,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,17 +26,9 @@ public class FilenameResolver {
 		this.httpClient = httpClient;
 	}
 
-	public String resolve(String directUrl) {
-		String filename = fetchFilename(directUrl);
-		if (filename == null) {
-			throw new IllegalStateException("Could not resolve filename for URL " + directUrl);
-		}
-		return filename;
-	}
-
-	private String fetchFilename(String url) {
+	public String resolve(String directUrl) throws IOException {
 		Request request = new Request.Builder()
-				.url(url)
+				.url(directUrl)
 				.head()
 				.build();
 
@@ -48,11 +39,13 @@ public class FilenameResolver {
 			}
 
 			String finalUrl = response.request().url().toString();
-			return extractFilenameFromUrl(finalUrl);
-		} catch (IOException e) {
-			logger.warn("HEAD request failed for URL %s: %s", url, e.getMessage());
-			return null;
+			String fromUrl = extractFilenameFromUrl(finalUrl);
+			if (fromUrl != null) {
+				return fromUrl;
+			}
 		}
+
+		throw new IOException("Could not resolve filename for URL: " + directUrl);
 	}
 
 	private String extractFromContentDisposition(Response response) {
@@ -70,24 +63,18 @@ public class FilenameResolver {
 	}
 
 	private String extractFilenameFromUrl(String url) {
-		try {
-			URL parsed = new URL(url);
-			String path = parsed.getPath();
-			if (path == null || path.isEmpty()) {
-				logger.warn("URL path is empty: %s", url);
-				return null;
-			}
-
-			String fileName = path.substring(path.lastIndexOf('/') + 1);
-			if (!fileName.isEmpty()) {
-				logger.info("Filename from URL: %s", fileName);
-				return fileName;
-			}
-
-			return null;
-		} catch (MalformedURLException e) {
-			logger.error("Malformed URL while extracting filename: %s", url);
+		String path = URI.create(url).getPath();
+		if (path == null || path.isEmpty()) {
+			logger.warn("URL path is empty: %s", url);
 			return null;
 		}
+
+		String fileName = path.substring(path.lastIndexOf('/') + 1);
+		if (!fileName.isEmpty()) {
+			logger.info("Filename from URL: %s", fileName);
+			return fileName;
+		}
+
+		return null;
 	}
 }
