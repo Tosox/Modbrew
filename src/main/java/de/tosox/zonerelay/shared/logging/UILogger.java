@@ -19,15 +19,17 @@ public class UILogger implements Logger {
 			return;
 		}
 
-		StyledDocument doc = outputPane.getStyledDocument();
-		Style style = outputPane.addStyle("style", null);
-		StyleConstants.setForeground(style, color);
-		StyleConstants.setFontFamily(style, "monospaced");
+		SwingUtilities.invokeLater(() -> {
+			StyledDocument doc = outputPane.getStyledDocument();
+			Style style = outputPane.addStyle("style", null);
+			StyleConstants.setForeground(style, color);
+			StyleConstants.setFontFamily(style, "monospaced");
 
-		try {
-			doc.insertString(doc.getLength(), text + "\n", style);
-			outputPane.setCaretPosition(doc.getLength());
-		} catch (BadLocationException ignored) {}
+			try {
+				doc.insertString(doc.getLength(), text + "\n", style);
+				outputPane.setCaretPosition(doc.getLength());
+			} catch (BadLocationException ignored) {}
+		});
 	}
 
 	@Override
