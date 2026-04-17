@@ -14,6 +14,8 @@ import de.tosox.zonerelay.shared.logging.Logger;
 import de.tosox.zonerelay.shared.progress.ProgressListener;
 import lombok.Setter;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -103,6 +105,7 @@ public class InstallCoordinator {
 		uiLogger.info(localizer.translate("MSG_INSTALLATION_CLEANUP"));
 		uiLogger.info("=================================================================");
 		progressStore.clear();
+		FileUtils.deleteQuietly(paths.getTempDir().toFile());
 
 		uiLogger.info(localizer.translate("MSG_COMPLETE_INSTALLATION"));
 		fileLogger.info("Installation completed successfully");
