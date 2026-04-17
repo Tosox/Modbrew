@@ -18,11 +18,13 @@ public class LogManager {
 	public LogManager(JTextPane outputPane, Path logsDir) {
 		this.logFolder = createRunLogFolder(logsDir);
 
+		// TODO: Don't hardcode LogLevel
 		this.fileLogger = new FileLogger(logFolder.resolve("app.log"), LogLevel.INFO);
 		this.uiLogger = new UILogger(outputPane);
 	}
 
 	private Path createRunLogFolder(Path baseDir) {
+		// TODO: Clean up log directories
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 		String folderName = "log_" + formatter.format(LocalDateTime.now());
 		Path folder = baseDir.resolve(folderName);

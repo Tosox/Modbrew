@@ -36,6 +36,7 @@ public class HttpArchiveDownloader implements ArchiveDownloader {
 
 	@Override
 	public File download(String url, File destination, ProgressListener listener) throws Exception {
+		// TODO: Filename resolving shouldn't be needed to check if the archive is already downloaded
 		String resolvedUrl = resolveUrl(url);
 
 		String filename = filenameResolver.resolve(resolvedUrl);
