@@ -42,6 +42,17 @@ public class MainFrameController {
 		this.paths = paths;
 		this.modlistRepository = modlistRepository;
 		this.modlistValidator = modlistValidator;
+
+		installCoordinator.setCurrentProgressListener((current, total) -> {
+			if (total <= 0) {
+				mainFrame.setCurrentProgressIndeterminate();
+			} else {
+				mainFrame.setCurrentProgress((int) (current * 100 / total));
+			}
+		});
+		installCoordinator.setTotalProgressListener((current, total) ->
+				mainFrame.setTotalProgress(total <= 0 ? 0 : (int) (current * 100 / total))
+		);
 	}
 
 	public void onInstallClick() {
@@ -71,21 +82,10 @@ public class MainFrameController {
 			config = modlistRepository.load(paths.getModlistYaml());
 			modlistValidator.validate(config);
 		} catch (Exception e) {
-			logManager.getUiLogger().error(localizer.translate("ERR_CONFIG_INVALID"));
+			logManager.getUiLogger().error(localizer.translate("ERR_CONFIG_INVALID", e.getMessage()));
 			logManager.getFileLogger().error("Failed to load or validate config: " + e.getMessage());
 			return;
 		}
-
-		installCoordinator.setCurrentProgressListener((current, total) -> {
-			if (total <= 0) {
-				mainFrame.setCurrentProgressIndeterminate();
-			} else {
-				mainFrame.setCurrentProgress((int) (current * 100 / total));
-			}
-		});
-		installCoordinator.setTotalProgressListener((current, total) ->
-				mainFrame.setTotalProgress(total <= 0 ? 0 : (int) (current * 100 / total))
-		);
 
 		String resumeFromId = promptForResume(config);
 
