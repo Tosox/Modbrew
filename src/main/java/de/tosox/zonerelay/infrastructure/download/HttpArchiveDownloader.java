@@ -81,6 +81,6 @@ public class HttpArchiveDownloader implements ArchiveDownloader {
 				return source.resolve(url);
 			}
 		}
-		return url; // should not happen if DirectUrlSource is in the list
+		throw new IllegalStateException("No URL source found for: " + url);
 	}
 }
