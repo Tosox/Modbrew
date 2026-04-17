@@ -125,7 +125,7 @@ public class InstallCoordinator {
 			progressStore.save(entry.getId());
 
 			logManager.getUiLogger().info(localizer.translate("MSG_TITLE_CONFIGENTRY", entry.getName()));
-			logManager.getFileLogger().info("Installing entry: {0}", entry.getId());
+			logManager.getFileLogger().info("Installing entry: %s", entry.getId());
 
 			File archive = null;
 			if (entry instanceof Mod mod) {
