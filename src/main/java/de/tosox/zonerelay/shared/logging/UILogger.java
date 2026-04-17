@@ -15,10 +15,6 @@ public class UILogger implements Logger {
 	}
 
 	private void append(String text, Color color) {
-		if (outputPane == null) {
-			return;
-		}
-
 		SwingUtilities.invokeLater(() -> {
 			StyledDocument doc = outputPane.getStyledDocument();
 			Style style = outputPane.addStyle("style", null);
