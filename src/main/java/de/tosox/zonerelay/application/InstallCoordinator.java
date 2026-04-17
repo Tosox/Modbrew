@@ -2,6 +2,7 @@ package de.tosox.zonerelay.application;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import de.tosox.zonerelay.domain.model.EntryType;
 import de.tosox.zonerelay.domain.model.Mod;
 import de.tosox.zonerelay.domain.model.ModEntry;
@@ -9,7 +10,7 @@ import de.tosox.zonerelay.domain.model.ModlistConfig;
 import de.tosox.zonerelay.domain.port.*;
 import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.shared.i18n.Localizer;
-import de.tosox.zonerelay.shared.logging.LogManager;
+import de.tosox.zonerelay.shared.logging.Logger;
 import de.tosox.zonerelay.shared.progress.ProgressListener;
 import lombok.Setter;
 
@@ -20,7 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public class InstallCoordinator {
-	private final LogManager logManager;
+	private final Logger fileLogger;
+	private final Logger uiLogger;
 	private final Localizer localizer;
 	private final List<ModInstaller> installers;
 	private final ArchiveDownloader archiveDownloader;
@@ -39,11 +41,13 @@ public class InstallCoordinator {
 	private ProgressListener totalProgressListener;
 
 	@Inject
-	public InstallCoordinator(LogManager logManager, Localizer localizer, List<ModInstaller> installers,
+	public InstallCoordinator(@Named("file") Logger fileLogger, @Named("ui") Logger uiLogger,
+	                          Localizer localizer, List<ModInstaller> installers,
 	                          ArchiveDownloader archiveDownloader, ProfileSetup profileSetup,
 	                          SplashImageCopier splashImageCopier, ShortcutCreator shortcutCreator,
 	                          InstallProgressStore progressStore, AppPaths paths) {
-		this.logManager = logManager;
+		this.fileLogger = fileLogger;
+		this.uiLogger = uiLogger;
 		this.localizer = localizer;
 		this.installers = installers;
 		this.archiveDownloader = archiveDownloader;
@@ -60,7 +64,7 @@ public class InstallCoordinator {
 			try {
 				runInstallation(config, fullInstall, resumeFromId);
 			} catch (Exception e) {
-				logManager.getFileLogger().error("Installation failed: %s", e.getMessage());
+				fileLogger.error("Installation failed: %s", e.getMessage());
 				throw new RuntimeException(e);
 			} finally {
 				isInstalling.set(false);
@@ -81,26 +85,26 @@ public class InstallCoordinator {
 		AtomicInteger completedMods = new AtomicInteger(0);
 		AtomicBoolean resumePointFound = new AtomicBoolean(resumeFromId == null);
 
-		logManager.getUiLogger().info("\n=================================================================");
-		logManager.getUiLogger().info(localizer.translate("MSG_STARTING_INSTALLATION"));
-		logManager.getUiLogger().info("=================================================================");
+		uiLogger.info("\n=================================================================");
+		uiLogger.info(localizer.translate("MSG_STARTING_INSTALLATION"));
+		uiLogger.info("=================================================================");
 		installEntries(config.getMods(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound);
 		installEntries(config.getPatches(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound);
 		installEntries(config.getSeparators(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound);
 
-		logManager.getUiLogger().info("\n=================================================================");
-		logManager.getUiLogger().info(localizer.translate("MSG_INSTALLATION_MO2_SETUP"));
-		logManager.getUiLogger().info("=================================================================");
+		uiLogger.info("\n=================================================================");
+		uiLogger.info(localizer.translate("MSG_INSTALLATION_MO2_SETUP"));
+		uiLogger.info("=================================================================");
 		setupMo2Environment(config);
 		totalProgressListener.onProgressUpdate(completedMods.incrementAndGet(), totalMods);
 
-		logManager.getUiLogger().info("\n=================================================================");
-		logManager.getUiLogger().info(localizer.translate("MSG_INSTALLATION_CLEANUP"));
-		logManager.getUiLogger().info("=================================================================");
+		uiLogger.info("\n=================================================================");
+		uiLogger.info(localizer.translate("MSG_INSTALLATION_CLEANUP"));
+		uiLogger.info("=================================================================");
 		progressStore.clear();
 
-		logManager.getUiLogger().info(localizer.translate("MSG_COMPLETE_INSTALLATION"));
-		logManager.getFileLogger().info("Installation completed successfully");
+		uiLogger.info(localizer.translate("MSG_COMPLETE_INSTALLATION"));
+		fileLogger.info("Installation completed successfully");
 
 		currentProgressListener.onProgressUpdate(1, 1);
 	}
@@ -124,12 +128,12 @@ public class InstallCoordinator {
 			}
 			progressStore.save(entry.getId());
 
-			logManager.getUiLogger().info(localizer.translate("MSG_TITLE_CONFIGENTRY", entry.getName()));
-			logManager.getFileLogger().info("Installing entry: %s", entry.getId());
+			uiLogger.info(localizer.translate("MSG_TITLE_CONFIGENTRY", entry.getName()));
+			fileLogger.info("Installing entry: %s", entry.getId());
 
 			File archive = null;
 			if (entry instanceof Mod mod) {
-				logManager.getUiLogger().info(localizer.translate("MSG_DOWNLOADING_ARCHIVE"));
+				uiLogger.info(localizer.translate("MSG_DOWNLOADING_ARCHIVE"));
 				archive = archiveDownloader.download(mod.getUrl(), paths.getDownloadsDir().toFile(), currentProgressListener);
 			}
 
@@ -146,16 +150,16 @@ public class InstallCoordinator {
 	}
 
 	private void setupMo2Environment(ModlistConfig config) {
-		logManager.getUiLogger().info(localizer.translate("MSG_CREATE_CUSTOM_PROFILE"));
-		logManager.getFileLogger().info("Setting up MO2 profile");
+		uiLogger.info(localizer.translate("MSG_CREATE_CUSTOM_PROFILE"));
+		fileLogger.info("Setting up MO2 profile");
 		profileSetup.setupProfile(config.getProfileName());
 
-		logManager.getUiLogger().info(localizer.translate("MSG_COPY", "splash.png"));
-		logManager.getFileLogger().info("Copying splash image");
+		uiLogger.info(localizer.translate("MSG_COPY", "splash.png"));
+		fileLogger.info("Copying splash image");
 		splashImageCopier.copySplashImage();
 
-		logManager.getUiLogger().info(localizer.translate("MSG_CREATE_SHORTCUT"));
-		logManager.getFileLogger().info("Creating desktop shortcut");
+		uiLogger.info(localizer.translate("MSG_CREATE_SHORTCUT"));
+		fileLogger.info("Creating desktop shortcut");
 		shortcutCreator.createShortcut(config.getShortcutName());
 	}
 }

@@ -8,7 +8,8 @@ import de.tosox.zonerelay.domain.model.Separator;
 import de.tosox.zonerelay.domain.port.MetaIniWriter;
 import de.tosox.zonerelay.domain.port.ModInstaller;
 import de.tosox.zonerelay.shared.i18n.Localizer;
-import de.tosox.zonerelay.shared.logging.LogManager;
+import com.google.inject.name.Named;
+import de.tosox.zonerelay.shared.logging.Logger;
 import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.shared.progress.ProgressListener;
 
@@ -18,15 +19,17 @@ import java.nio.file.Path;
 
 @Singleton
 public class SeparatorInstaller implements ModInstaller {
-	private final LogManager logManager;
+	private final Logger fileLogger;
+	private final Logger uiLogger;
 	private final Localizer localizer;
 	private final MetaIniWriter metaIniWriter;
 	private final AppPaths paths;
 
 	@Inject
-	public SeparatorInstaller(LogManager logManager, Localizer localizer,
-	                          MetaIniWriter metaIniWriter, AppPaths paths) {
-		this.logManager = logManager;
+	public SeparatorInstaller(@Named("file") Logger fileLogger, @Named("ui") Logger uiLogger,
+	                          Localizer localizer, MetaIniWriter metaIniWriter, AppPaths paths) {
+		this.fileLogger = fileLogger;
+		this.uiLogger = uiLogger;
 		this.localizer = localizer;
 		this.metaIniWriter = metaIniWriter;
 		this.paths = paths;
@@ -46,8 +49,8 @@ public class SeparatorInstaller implements ModInstaller {
 
 		Path modDir = paths.getModsDir().resolve(separator.getName() + "_separator");
 
-		logManager.getUiLogger().info(localizer.translate("MSG_CREATE_SEPARATOR", modDir));
-		logManager.getFileLogger().info("Creating separator: %s", separator.getName());
+		uiLogger.info(localizer.translate("MSG_CREATE_SEPARATOR", modDir));
+		fileLogger.info("Creating separator: %s", separator.getName());
 		Files.createDirectories(modDir);
 
 		metaIniWriter.generate(separator, modDir);

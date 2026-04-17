@@ -10,7 +10,8 @@ import de.tosox.zonerelay.domain.port.ArchiveExtractor;
 import de.tosox.zonerelay.domain.port.MetaIniWriter;
 import de.tosox.zonerelay.domain.port.ModInstaller;
 import de.tosox.zonerelay.shared.i18n.Localizer;
-import de.tosox.zonerelay.shared.logging.LogManager;
+import com.google.inject.name.Named;
+import de.tosox.zonerelay.shared.logging.Logger;
 import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.shared.progress.ProgressListener;
 import org.apache.commons.io.FileUtils;
@@ -23,7 +24,8 @@ import java.util.List;
 
 @Singleton
 public class ModEntryInstaller implements ModInstaller {
-	private final LogManager logManager;
+	private final Logger fileLogger;
+	private final Logger uiLogger;
 	private final Localizer localizer;
 	private final ArchiveExtractor extractor;
 	private final MetaIniWriter metaIniWriter;
@@ -31,10 +33,11 @@ public class ModEntryInstaller implements ModInstaller {
 	private final AppPaths paths;
 
 	@Inject
-	public ModEntryInstaller(LogManager logManager, Localizer localizer,
-	                         ArchiveExtractor extractor, MetaIniWriter metaIniWriter,
+	public ModEntryInstaller(@Named("file") Logger fileLogger, @Named("ui") Logger uiLogger,
+	                         Localizer localizer, ArchiveExtractor extractor, MetaIniWriter metaIniWriter,
 	                         Mo2ConfigReader mo2ConfigReader, AppPaths paths) {
-		this.logManager = logManager;
+		this.fileLogger = fileLogger;
+		this.uiLogger = uiLogger;
 		this.localizer = localizer;
 		this.extractor = extractor;
 		this.metaIniWriter = metaIniWriter;
@@ -57,26 +60,23 @@ public class ModEntryInstaller implements ModInstaller {
 		Path targetDir;
 		if (mod.getType() == EntryType.MOD) {
 			targetDir = paths.getModsDir().resolve(mod.getName());
+			uiLogger.info(localizer.translate("MSG_ADDON_DELETE_OLD_VERSION"));
+			fileLogger.info("Deleting previous version in %s", targetDir);
+			FileUtils.deleteDirectory(targetDir.toFile());
 		} else {
 			targetDir = mo2ConfigReader.getGamePath();
-		}
-
-		if (mod.getType() == EntryType.MOD) {
-			logManager.getUiLogger().info(localizer.translate("MSG_ADDON_DELETE_OLD_VERSION"));
-			logManager.getFileLogger().info("Deleting previous version in %s", targetDir);
-			FileUtils.deleteDirectory(targetDir.toFile());
 		}
 
 		Path tempDir = paths.getTempDir().resolve(FilenameUtils.removeExtension(archive.getName()));
 		Files.createDirectories(tempDir);
 
 		try {
-			logManager.getUiLogger().info(localizer.translate("MSG_EXTRACT_TO", tempDir));
-			logManager.getFileLogger().info("Extracting %s to %s", archive.getPath(), tempDir);
+			uiLogger.info(localizer.translate("MSG_EXTRACT_TO", tempDir));
+			fileLogger.info("Extracting %s to %s", archive.getPath(), tempDir);
 			extractor.extract(archive, tempDir);
 
-			logManager.getUiLogger().info(localizer.translate("MSG_READ_SETUP"));
-			logManager.getFileLogger().info("Reading setup instructions");
+			uiLogger.info(localizer.translate("MSG_READ_SETUP"));
+			fileLogger.info("Reading setup instructions");
 
 			List<String> setup = mod.getSetup();
 			int total = setup.size();
@@ -86,19 +86,19 @@ public class ModEntryInstaller implements ModInstaller {
 				Path source = tempDir.resolve(instruction);
 				Path destination = targetDir.resolve(source.getFileName());
 
-				logManager.getUiLogger().info(localizer.translate("MSG_COPY_TO", instruction, source.getFileName()));
-				logManager.getFileLogger().info("Copying %s → %s", source, destination);
+				uiLogger.info(localizer.translate("MSG_COPY_TO", instruction, source.getFileName()));
+				fileLogger.info("Copying %s → %s", source, destination);
 				FileUtils.copyDirectory(source.toFile(), destination.toFile());
 
 				progressListener.onProgressUpdate(i + 1, total);
 			}
 		} finally {
-			logManager.getFileLogger().info("Cleaning up temp dir: %s", tempDir);
+			fileLogger.info("Cleaning up temp dir: %s", tempDir);
 			FileUtils.deleteDirectory(tempDir.toFile());
 		}
 
 		if (mod.getType() == EntryType.MOD) {
-			logManager.getUiLogger().info(localizer.translate("MSG_GENERATE_META"));
+			uiLogger.info(localizer.translate("MSG_GENERATE_META"));
 			metaIniWriter.generate(mod, targetDir);
 		}
 		progressListener.onProgressUpdate(1, 1);

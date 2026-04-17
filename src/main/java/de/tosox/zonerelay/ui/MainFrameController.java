@@ -9,7 +9,8 @@ import de.tosox.zonerelay.domain.port.InstallProgressStore;
 import de.tosox.zonerelay.domain.port.ModlistRepository;
 import de.tosox.zonerelay.domain.service.ModlistValidator;
 import de.tosox.zonerelay.shared.i18n.Localizer;
-import de.tosox.zonerelay.shared.logging.LogManager;
+import com.google.inject.name.Named;
+import de.tosox.zonerelay.shared.logging.Logger;
 import de.tosox.zonerelay.shared.config.AppPaths;
 
 import javax.swing.*;
@@ -21,7 +22,8 @@ import java.util.stream.Stream;
 @Singleton
 public class MainFrameController {
 	private final Localizer localizer;
-	private final LogManager logManager;
+	private final Logger fileLogger;
+	private final Logger uiLogger;
 	private final MainFrame mainFrame;
 	private final InstallCoordinator installCoordinator;
 	private final InstallProgressStore progressStore;
@@ -30,12 +32,14 @@ public class MainFrameController {
 	private final ModlistValidator modlistValidator;
 
 	@Inject
-	public MainFrameController(Localizer localizer, LogManager logManager,
-	                           MainFrame mainFrame, InstallCoordinator installCoordinator,
-	                           InstallProgressStore progressStore, AppPaths paths,
-	                           ModlistRepository modlistRepository, ModlistValidator modlistValidator) {
+	public MainFrameController(Localizer localizer, @Named("file") Logger fileLogger,
+	                           @Named("ui") Logger uiLogger, MainFrame mainFrame,
+	                           InstallCoordinator installCoordinator, InstallProgressStore progressStore,
+	                           AppPaths paths, ModlistRepository modlistRepository,
+	                           ModlistValidator modlistValidator) {
 		this.localizer = localizer;
-		this.logManager = logManager;
+		this.fileLogger = fileLogger;
+		this.uiLogger = uiLogger;
 		this.mainFrame = mainFrame;
 		this.installCoordinator = installCoordinator;
 		this.progressStore = progressStore;
@@ -57,33 +61,33 @@ public class MainFrameController {
 
 	public void onInstallClick() {
 		if (installCoordinator.isInstalling()) {
-			logManager.getUiLogger().warn(localizer.translate("ERR_ALREADY_INSTALLING"));
-			logManager.getFileLogger().warn("Installation already in progress");
+			uiLogger.warn(localizer.translate("ERR_ALREADY_INSTALLING"));
+			fileLogger.warn("Installation already in progress");
 			return;
 		}
 
 		if (Files.notExists(paths.getMo2Exe())) {
-			logManager.getUiLogger().warn(localizer.translate("ERR_INVALID_INSTALL_DIR"));
-			logManager.getFileLogger().warn("Please move the installer into the MO2 directory");
+			uiLogger.warn(localizer.translate("ERR_INVALID_INSTALL_DIR"));
+			fileLogger.warn("Please move the installer into the MO2 directory");
 			return;
 		}
 
 		if (Files.notExists(paths.getMo2Config())) {
-			logManager.getUiLogger().warn(localizer.translate("ERR_LAUNCH_MO2"));
-			logManager.getFileLogger().warn("Please launch MO2 once first");
+			uiLogger.warn(localizer.translate("ERR_LAUNCH_MO2"));
+			fileLogger.warn("Please launch MO2 once first");
 			return;
 		}
 
-		logManager.getUiLogger().info(localizer.translate("MSG_READ_MODLIST_CFG"));
-		logManager.getFileLogger().info("Reading modlist configuration");
+		uiLogger.info(localizer.translate("MSG_READ_MODLIST_CFG"));
+		fileLogger.info("Reading modlist configuration");
 
 		ModlistConfig config;
 		try {
 			config = modlistRepository.load(paths.getModlistYaml());
 			modlistValidator.validate(config);
 		} catch (Exception e) {
-			logManager.getUiLogger().error(localizer.translate("ERR_CONFIG_INVALID", e.getMessage()));
-			logManager.getFileLogger().error("Failed to load or validate config: " + e.getMessage());
+			uiLogger.error(localizer.translate("ERR_CONFIG_INVALID", e.getMessage()));
+			fileLogger.error("Failed to load or validate config: " + e.getMessage());
 			return;
 		}
 
@@ -94,8 +98,8 @@ public class MainFrameController {
 
 	public void onLaunchClick() {
 		if (Files.notExists(paths.getMo2Exe())) {
-			logManager.getUiLogger().warn(localizer.translate("ERR_INVALID_INSTALL_DIR"));
-			logManager.getFileLogger().warn("Please move the installer into the MO2 directory");
+			uiLogger.warn(localizer.translate("ERR_INVALID_INSTALL_DIR"));
+			fileLogger.warn("Please move the installer into the MO2 directory");
 			return;
 		}
 
@@ -104,8 +108,8 @@ public class MainFrameController {
 					.directory(paths.getMo2Dir().toFile())
 					.start();
 		} catch (IOException e) {
-			logManager.getUiLogger().error(localizer.translate("ERR_LAUNCH_MO2_FAIL"));
-			logManager.getFileLogger().error("Failed to launch MO2: " + e.getMessage());
+			uiLogger.error(localizer.translate("ERR_LAUNCH_MO2_FAIL"));
+			fileLogger.error("Failed to launch MO2: " + e.getMessage());
 		}
 	}
 
