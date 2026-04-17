@@ -28,7 +28,7 @@ public class FileInstallProgressStore implements InstallProgressStore {
 		try {
 			Files.writeString(progressFile, entryId, StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			logger.error("Failed to save install progress: %s", e.getMessage());
+			logger.error("Failed to save install progress", e);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class FileInstallProgressStore implements InstallProgressStore {
 		try {
 			return Files.readString(progressFile, StandardCharsets.UTF_8).trim();
 		} catch (IOException e) {
-			logger.error("Failed to read install progress: %s", e.getMessage());
+			logger.error("Failed to read install progress", e);
 		}
 
 		return null;
@@ -57,7 +57,7 @@ public class FileInstallProgressStore implements InstallProgressStore {
 		try {
 			Files.deleteIfExists(progressFile);
 		} catch (IOException e) {
-			logger.error("Failed to delete install progress file: %s", e.getMessage());
+			logger.error("Failed to delete install progress file", e);
 		}
 	}
 }
