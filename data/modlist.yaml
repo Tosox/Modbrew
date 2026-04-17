@@ -6,7 +6,7 @@ mods:
     name: Mod Configuration Menu
     url: https://www.moddb.com/mods/stalker-anomaly/addons/anomaly-mod-configuration-menu
     setup: [
-      "gamedata"""
+      "gamedata"
     ]
   - id: fdda
     name: Food, Drug and Drink Animations
