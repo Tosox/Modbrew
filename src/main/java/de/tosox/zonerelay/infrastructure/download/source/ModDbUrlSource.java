@@ -38,8 +38,7 @@ public class ModDbUrlSource implements UrlSource {
 			Document addonPage = fetchPage(url);
 			Element downloadElem = addonPage.getElementById("downloadmirrorstoggle");
 			if (downloadElem == null) {
-				logger.error("Download element not found on ModDB page.");
-				return null;
+				throw new IOException("Download element not found on ModDB page: " + url);
 			}
 
 			String relDownloadUrl = downloadElem.attr("href");
@@ -49,8 +48,7 @@ public class ModDbUrlSource implements UrlSource {
 			// TODO: Resolve best mirror
 			Element downloadLinkElement = downloadPage.selectFirst("p a:first-child");
 			if (downloadLinkElement == null) {
-				logger.error("Download link not found on ModDB download page.");
-				return null;
+				throw new IOException("Download link not found on ModDB download page: " + downloadPageUrl);
 			}
 
 			String relDownloadLink = downloadLinkElement.attr("href");
