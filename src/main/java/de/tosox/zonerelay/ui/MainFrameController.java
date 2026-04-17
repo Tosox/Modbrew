@@ -100,7 +100,9 @@ public class MainFrameController {
 		}
 
 		try {
-			Runtime.getRuntime().exec(paths.getMo2Exe().toString(), null, paths.getMo2Dir().toFile());
+			new ProcessBuilder(paths.getMo2Exe().toString())
+					.directory(paths.getMo2Dir().toFile())
+					.start();
 		} catch (IOException e) {
 			logManager.getUiLogger().error(localizer.translate("ERR_LAUNCH_MO2_FAIL"));
 			logManager.getFileLogger().error("Failed to launch MO2: " + e.getMessage());
