@@ -16,9 +16,7 @@ public class Mod extends ModEntry {
 	           @JsonProperty("name") String name,
 	           @JsonProperty("url") String url,
 	           @JsonProperty("setup") List<String> setup) {
-		super(id, EntryType.MOD, name);
-		this.url = url;
-		this.setup = setup;
+		this(id, EntryType.MOD, name, url, setup);
 	}
 
 	protected Mod(String id, EntryType type, String name, String url, List<String> setup) {
