@@ -1,6 +1,0 @@
-package de.tosox.zonerelay.util;
-
-@FunctionalInterface
-public interface ProgressListener {
-	void onProgressUpdate(long current, long total);
-}

@@ -1,23 +1,26 @@
+profileName: VIP
+shortcutName: "S.T.A.L.K.E.R. VIP"
+
 mods:
   - id: mcm
     name: Mod Configuration Menu
     url: https://www.moddb.com/mods/stalker-anomaly/addons/anomaly-mod-configuration-menu
     setup: [
-      'gamedata'
+      "gamedata"
     ]
   - id: fdda
     name: Food, Drug and Drink Animations
     url: https://github.com/Grokitach/anomaly_fdda/archive/refs/heads/main.zip
     setup: [
-      'anomaly_fdda-main/gamedata'
+      "anomaly_fdda-main/gamedata"
     ]
 patches:
   - id: modded-exes
     name: Modded Exes
     url: https://github.com/themrdemonized/xray-monolith/releases/download/2024.12.9/STALKER-Anomaly-modded-exes_2024.12.9.zip
     setup: [
-      'db',
-      'bin'
+      "db",
+      "bin"
     ]
 separators:
   - id: frameworks-separator
