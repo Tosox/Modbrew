@@ -19,9 +19,9 @@ public class MainFrame extends JFrame {
 	private final ImageLoader imageLoader;
 	private final JTextPane txpOutput;
 
-	private JCheckBox cbxFullInstall = new JCheckBox();
-	private JProgressBar pgbCurrent = new JProgressBar();
-	private JProgressBar pgbTotal = new JProgressBar();
+	private JCheckBox cbxFullInstall;
+	private JProgressBar pgbCurrent;
+	private JProgressBar pgbTotal;
 
 	private MainFrameController controller;
 
