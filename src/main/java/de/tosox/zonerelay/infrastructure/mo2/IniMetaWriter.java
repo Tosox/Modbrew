@@ -13,6 +13,7 @@ import de.tosox.zonerelay.shared.config.AppPaths;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 
 @Singleton
 public class IniMetaWriter implements MetaIniWriter {
@@ -39,9 +40,11 @@ public class IniMetaWriter implements MetaIniWriter {
 			throw new IllegalArgumentException("Unsupported entry type for meta.ini: " + entry.getClass());
 		}
 
+		String url = entry instanceof Mod mod ? mod.getUrl() : "";
 		String content = template
-				.replace("{id}", entry.getId())
-				.replace("{name}", entry.getName());
+				.replace("{name}", entry.getName())
+				.replace("{url}", url)
+				.replace("{date}", LocalDate.now().toString());
 
 		Files.createDirectories(targetDir);
 		Files.writeString(targetDir.resolve("meta.ini"), content);
