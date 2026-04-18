@@ -49,7 +49,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.build-ver }}
-          name: Release ${{ inputs.build-ver }}
+          name: ${{ inputs.build-ver }}
           body_path: ./CHANGELOG.md
           prerelease: false
           files: release/ZoneRelay-${{ inputs.build-ver }}.zip
