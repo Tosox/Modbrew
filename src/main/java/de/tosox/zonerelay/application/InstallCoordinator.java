@@ -71,7 +71,7 @@ public class InstallCoordinator {
 			} finally {
 				isInstalling.set(false);
 			}
-		});
+		}, "install-thread");
 		thread.start();
 	}
 
