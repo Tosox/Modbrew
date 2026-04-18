@@ -38,21 +38,16 @@ public class ModlistValidator {
 		if (entry.getId() == null || entry.getId().isBlank()) {
 			throw new IllegalArgumentException("Entry missing id: " + entry);
 		}
-
 		if (!seenIds.add(entry.getId())) {
 			throw new IllegalArgumentException("Duplicate id found: " + entry.getId());
 		}
+		if (entry.getName() == null || entry.getName().isBlank()) {
+			throw new IllegalArgumentException("Entry missing name: " + entry.getId());
+		}
 
 		if (entry instanceof Mod mod) {
-			if (mod.getName() == null || mod.getName().isBlank()) {
-				throw new IllegalArgumentException("Mod missing name: " + mod.getId());
-			}
 			validateUrl(mod.getUrl(), mod.getId());
-		} else if (entry instanceof Separator separator) {
-			if (separator.getName() == null || separator.getName().isBlank()) {
-				throw new IllegalArgumentException("Separator missing name: " + separator.getId());
-			}
-		} else {
+		} else if (!(entry instanceof Separator)) {
 			throw new IllegalArgumentException("Unknown ModEntry type: " + entry.getClass().getSimpleName());
 		}
 	}
