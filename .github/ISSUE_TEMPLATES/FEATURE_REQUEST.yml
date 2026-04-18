@@ -1,0 +1,29 @@
+name: Feature Request
+description: Request for a new feature to be added
+projects:
+  - Tosox/7
+body:
+  - type: markdown
+    attributes:
+      value: "## Task\nPlease fill out the following details to help us effectively plan and execute the task."
+
+  - type: textarea
+    attributes:
+      label: Task Description
+      description: "Provide a detailed description of the task."
+      placeholder: "As a ... I need ... so that I ..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Acceptance Criteria
+      description: "What are the acceptance criteria for this task?"
+      placeholder: "List the conditions that must be met for the task to be considered complete."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional Information
+      description: "Any other details to help complete the task"
