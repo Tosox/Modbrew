@@ -7,7 +7,7 @@ import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            JOptionPane.showMessageDialog(null, throwable.getMessage(), "Fatal Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, throwable.toString(), "Fatal Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         });
 
