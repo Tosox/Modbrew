@@ -11,21 +11,26 @@ import lombok.With;
 public class UserSettings {
 	private static final String DEFAULT_LANGUAGE = "en-US";
 	private static final LogLevel DEFAULT_LOGLEVEL = LogLevel.INFO;
+	private static final ArchiveCleanupStrategy DEFAULT_CLEANUP = ArchiveCleanupStrategy.KEEP_LATEST_ONLY;
 
 	private final String language;
 	private final LogLevel logLevel;
+	private final ArchiveCleanupStrategy archiveCleanupStrategy;
 
 	public UserSettings() {
 		this.language = DEFAULT_LANGUAGE;
 		this.logLevel = DEFAULT_LOGLEVEL;
+		this.archiveCleanupStrategy = DEFAULT_CLEANUP;
 	}
 
 	@JsonCreator
 	public UserSettings(
 			@JsonProperty("language") String language,
-			@JsonProperty("logLevel") LogLevel logLevel) {
+			@JsonProperty("logLevel") LogLevel logLevel,
+			@JsonProperty("archiveCleanupStrategy") ArchiveCleanupStrategy archiveCleanupStrategy) {
 		this.language = language != null ? language : DEFAULT_LANGUAGE;
 		this.logLevel = logLevel != null ? logLevel : DEFAULT_LOGLEVEL;
+		this.archiveCleanupStrategy = archiveCleanupStrategy != null ? archiveCleanupStrategy : DEFAULT_CLEANUP;
 	}
 
 	public static UserSettings defaults() {

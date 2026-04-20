@@ -4,22 +4,31 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import de.tosox.zonerelay.domain.model.EntryType;
+import de.tosox.zonerelay.domain.model.HashMismatch;
 import de.tosox.zonerelay.domain.model.Mod;
 import de.tosox.zonerelay.domain.model.ModEntry;
 import de.tosox.zonerelay.domain.model.ModlistConfig;
 import de.tosox.zonerelay.domain.port.*;
+import de.tosox.zonerelay.infrastructure.download.DownloadsManifestStore;
+import de.tosox.zonerelay.infrastructure.download.ManifestEntry;
+import de.tosox.zonerelay.infrastructure.persistence.ModlistHashUpdater;
 import de.tosox.zonerelay.shared.config.AppPaths;
+import de.tosox.zonerelay.shared.config.ArchiveCleanupStrategy;
+import de.tosox.zonerelay.shared.config.UserSettings;
 import de.tosox.zonerelay.shared.i18n.Localizer;
 import de.tosox.zonerelay.shared.logging.Logger;
 import de.tosox.zonerelay.shared.progress.ProgressListener;
 import lombok.Setter;
-
 import org.apache.commons.io.FileUtils;
 
+import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Singleton
 public class InstallCoordinator {
@@ -33,6 +42,9 @@ public class InstallCoordinator {
 	private final ShortcutCreator shortcutCreator;
 	private final InstallProgressStore progressStore;
 	private final AppPaths paths;
+	private final UserSettings userSettings;
+	private final DownloadsManifestStore manifestStore;
+	private final ModlistHashUpdater modlistHashUpdater;
 
 	private final AtomicBoolean isInstalling = new AtomicBoolean(false);
 
@@ -47,7 +59,9 @@ public class InstallCoordinator {
 	                          Localizer localizer, List<ModInstaller> installers,
 	                          ArchiveDownloader archiveDownloader, ProfileSetup profileSetup,
 	                          SplashImageCopier splashImageCopier, ShortcutCreator shortcutCreator,
-	                          InstallProgressStore progressStore, AppPaths paths) {
+	                          InstallProgressStore progressStore, AppPaths paths,
+	                          UserSettings userSettings, DownloadsManifestStore manifestStore,
+	                          ModlistHashUpdater modlistHashUpdater) {
 		this.fileLogger = fileLogger;
 		this.uiLogger = uiLogger;
 		this.localizer = localizer;
@@ -58,6 +72,9 @@ public class InstallCoordinator {
 		this.shortcutCreator = shortcutCreator;
 		this.progressStore = progressStore;
 		this.paths = paths;
+		this.userSettings = userSettings;
+		this.manifestStore = manifestStore;
+		this.modlistHashUpdater = modlistHashUpdater;
 	}
 
 	public void startInstallation(ModlistConfig config, boolean fullInstall, String resumeFromId) {
@@ -87,13 +104,14 @@ public class InstallCoordinator {
 		int totalMods = config.getMods().size() + config.getPatches().size() + 1;
 		AtomicInteger completedMods = new AtomicInteger(0);
 		AtomicBoolean resumePointFound = new AtomicBoolean(resumeFromId == null);
+		List<HashMismatch> hashMismatches = new ArrayList<>();
 
 		uiLogger.info("\n=================================================================");
 		uiLogger.info(localizer.translate("MSG_STARTING_INSTALLATION"));
 		uiLogger.info("=================================================================");
-		installEntries(config.getMods(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound);
-		installEntries(config.getPatches(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound);
-		installEntries(config.getSeparators(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound);
+		installEntries(config.getMods(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches);
+		installEntries(config.getPatches(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches);
+		installEntries(config.getSeparators(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches);
 
 		uiLogger.info("\n=================================================================");
 		uiLogger.info(localizer.translate("MSG_INSTALLATION_MO2_SETUP"));
@@ -107,6 +125,10 @@ public class InstallCoordinator {
 		progressStore.clear();
 		FileUtils.deleteQuietly(paths.getTempDir().toFile());
 
+		if (!hashMismatches.isEmpty()) {
+			presentHashMismatchSummary(hashMismatches);
+		}
+
 		uiLogger.info(localizer.translate("MSG_COMPLETE_INSTALLATION"));
 		fileLogger.info("Installation completed successfully");
 
@@ -115,7 +137,8 @@ public class InstallCoordinator {
 
 	private void installEntries(List<? extends ModEntry> entries, boolean fullInstall,
 	                            int totalMods, AtomicInteger completedMods,
-	                            String resumeFromId, AtomicBoolean resumePointFound) throws Exception {
+	                            String resumeFromId, AtomicBoolean resumePointFound,
+	                            List<HashMismatch> hashMismatches) throws Exception {
 		if (entries == null || entries.isEmpty()) {
 			return;
 		}
@@ -135,22 +158,100 @@ public class InstallCoordinator {
 			uiLogger.info(localizer.translate("MSG_TITLE_CONFIGENTRY", entry.getName()));
 			fileLogger.info("Installing entry: %s", entry.getId());
 
-			File archive = null;
+			File archive;
 			if (entry instanceof Mod mod) {
-				uiLogger.info(localizer.translate("MSG_DOWNLOADING_ARCHIVE"));
-				archive = archiveDownloader.download(mod.getUrl(), paths.getDownloadsDir().toFile(), currentProgressListener);
-			}
+				ManifestEntry previousEntry = manifestStore.getManifest().getEntry(mod.getId());
 
-			ModInstaller installer = installers.stream()
-					.filter(i -> i.supports(entry))
-					.findFirst()
-					.orElseThrow(() -> new IllegalStateException("No installer for entry type: " + entry.getType()));
-			installer.install(entry, archive, currentProgressListener);
+				DownloadResult result = archiveDownloader.download(mod.getUrl(), mod.getId(), mod.getHash(),
+						paths.getDownloadsDir().toFile(), currentProgressListener);
+				archive = result.archive();
+
+				String installedHash = previousEntry != null ? previousEntry.installedHash() : null;
+				if (installedHash != null && installedHash.equalsIgnoreCase(result.computedHash())) {
+					uiLogger.info(localizer.translate("MSG_ADDON_ALREADY_UP_TO_DATE"));
+					fileLogger.info("Installed hash matches archive, skipping reinstall: %s", mod.getId());
+					if (entry.getType() != EntryType.SEPARATOR) {
+						totalProgressListener.onProgressUpdate(completedMods.incrementAndGet(), totalMods);
+					}
+					continue;
+				}
+
+				if (mod.hasHash()) {
+					if (!mod.getHash().equalsIgnoreCase(result.computedHash())) {
+						hashMismatches.add(new HashMismatch(mod.getName(), mod.getId(), mod.getHash(), result.computedHash()));
+						fileLogger.warn("Hash mismatch for %s: expected=%s actual=%s",
+								mod.getName(), mod.getHash(), result.computedHash());
+					} else {
+						fileLogger.info("Hash OK for %s", mod.getName());
+					}
+				}
+
+				findInstaller(entry).install(entry, archive, currentProgressListener);
+
+				manifestStore.recordInstall(mod.getId(), result.computedHash());
+				applyArchiveCleanup(result, previousEntry);
+			} else {
+				findInstaller(entry).install(entry, null, currentProgressListener);
+			}
 
 			if (entry.getType() != EntryType.SEPARATOR) {
 				totalProgressListener.onProgressUpdate(completedMods.incrementAndGet(), totalMods);
 			}
 		}
+	}
+
+	private ModInstaller findInstaller(ModEntry entry) {
+		return installers.stream()
+				.filter(i -> i.supports(entry))
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("No installer for entry type: " + entry.getType()));
+	}
+
+	private void applyArchiveCleanup(DownloadResult result, ManifestEntry previousEntry) {
+		ArchiveCleanupStrategy strategy = userSettings.getArchiveCleanupStrategy();
+		File currentArchive = result.archive();
+
+		switch (strategy) {
+			case DELETE_ALL -> {
+				FileUtils.deleteQuietly(currentArchive);
+				fileLogger.info("DELETE_ALL: removed archive %s", currentArchive.getName());
+			}
+			case KEEP_LATEST_ONLY -> {
+				if (previousEntry != null && !previousEntry.filename().equals(currentArchive.getName())) {
+					File oldArchive = new File(currentArchive.getParentFile(), previousEntry.filename());
+					if (oldArchive.isFile()) {
+						FileUtils.deleteQuietly(oldArchive);
+						fileLogger.info("KEEP_LATEST_ONLY: removed old archive %s", previousEntry.filename());
+					}
+				}
+			}
+			case KEEP_ALL -> { /* do nothing */ }
+		}
+	}
+
+	private void presentHashMismatchSummary(List<HashMismatch> mismatches) {
+		StringBuilder sb = new StringBuilder(localizer.translate("MSG_HASH_MISMATCH_SUMMARY"));
+		for (HashMismatch m : mismatches) {
+			sb.append("\n").append(localizer.translate("MSG_HASH_MISMATCH_ENTRY",
+					m.modName(), m.expectedHash(), m.actualHash()));
+		}
+		String message = sb.toString();
+		uiLogger.warn(message);
+		fileLogger.warn(message);
+		SwingUtilities.invokeLater(() -> {
+			JOptionPane.showMessageDialog(null, message,
+					localizer.translate("DLG_HASH_MISMATCH_TITLE"), JOptionPane.WARNING_MESSAGE);
+			int choice = JOptionPane.showConfirmDialog(null,
+					localizer.translate("DLG_HASH_MISMATCH_UPDATE_MESSAGE"),
+					localizer.translate("DLG_HASH_MISMATCH_UPDATE_TITLE"),
+					JOptionPane.YES_NO_OPTION);
+			if (choice == JOptionPane.YES_OPTION) {
+				Map<String, String> updates = mismatches.stream()
+						.collect(Collectors.toMap(HashMismatch::modId, HashMismatch::actualHash));
+				new Thread(() -> modlistHashUpdater.updateHashes(paths.getModlistYaml(), updates),
+						"modlist-hash-update").start();
+			}
+		});
 	}
 
 	private void setupMo2Environment(ModlistConfig config) {

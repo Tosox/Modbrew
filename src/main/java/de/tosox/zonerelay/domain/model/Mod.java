@@ -10,18 +10,25 @@ import java.util.List;
 public class Mod extends ModEntry {
 	private final String url;
 	private final List<String> setup;
+	private final String hash;
 
 	@JsonCreator
 	public Mod(@JsonProperty("id") String id,
 	           @JsonProperty("name") String name,
 	           @JsonProperty("url") String url,
+			   @JsonProperty("hash") String hash,
 	           @JsonProperty("setup") List<String> setup) {
-		this(id, EntryType.MOD, name, url, setup);
+		this(id, EntryType.MOD, name, url, hash, setup);
 	}
 
-	protected Mod(String id, EntryType type, String name, String url, List<String> setup) {
+	protected Mod(String id, EntryType type, String name, String url, String hash, List<String> setup) {
 		super(id, type, name);
 		this.url = url;
+		this.hash = hash;
 		this.setup = setup != null ? setup : List.of();
+	}
+
+	public boolean hasHash() {
+		return hash != null && !hash.isBlank();
 	}
 }

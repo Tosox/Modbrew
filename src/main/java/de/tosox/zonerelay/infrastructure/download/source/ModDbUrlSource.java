@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import de.tosox.zonerelay.infrastructure.download.HttpClient;
+import de.tosox.zonerelay.infrastructure.download.ResolveResult;
 import de.tosox.zonerelay.shared.logging.Logger;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -33,7 +34,7 @@ public class ModDbUrlSource implements UrlSource {
 	}
 
 	@Override
-	public String resolve(String url) throws Exception {
+	public ResolveResult resolve(String url) throws Exception {
 		Document addonPage = fetchPage(url);
 		Element downloadElem = addonPage.getElementById("downloadmirrorstoggle");
 		if (downloadElem == null) {
@@ -51,7 +52,27 @@ public class ModDbUrlSource implements UrlSource {
 		}
 
 		String relDownloadLink = downloadLinkElement.attr("href");
-		return MODDB_BASE + relDownloadLink;
+		String resolvedUrl = MODDB_BASE + relDownloadLink;
+
+		String hash = scrapeHash(addonPage);
+		if (hash != null) {
+			logger.info("Scraped ModDB MD5 hash: %s", hash);
+		}
+
+		return ResolveResult.of(resolvedUrl, hash);
+	}
+
+	private String scrapeHash(Document downloadPage) {
+		Element h5 = downloadPage.selectFirst("h5:contains(MD5 Hash)");
+		if (h5 == null) {
+			return null;
+		}
+		Element span = h5.nextElementSibling();
+		if (span == null) {
+			return null;
+		}
+		String hash = span.text().trim().toLowerCase();
+		return hash.isEmpty() ? null : hash;
 	}
 
 	private Document fetchPage(String url) throws IOException {

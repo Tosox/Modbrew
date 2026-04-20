@@ -15,7 +15,9 @@
   "MSG_CREATE_SEPARATOR": "    Creating separator in {0}",
   "MSG_GENERATE_META": "    Generating meta.ini file",
   "MSG_ADDON_DELETE_OLD_VERSION": "    Deleting contents of the previous version",
-  "MSG_DOWNLOADING_ARCHIVE": "    Downloading archive...",
+  "MSG_ADDON_ALREADY_UP_TO_DATE": "    Installed version matches archive — skipping reinstall",
+  "MSG_HASH_MISMATCH_SUMMARY": "\nHash mismatches detected for the following mods:",
+  "MSG_HASH_MISMATCH_ENTRY": "  {0}: expected {1}, got {2}",
   "MSG_READ_SETUP" : "    Reading setup instructions",
   "MSG_COPY_TO": "        Copying {0} ==> {1}",
   "MSG_COPY": "    Copying {0}",
@@ -33,5 +35,9 @@
   "ERR_INSTALLATION_FAILED": "An error occurred during installation: {0}",
 
   "DLG_RESUME_TITLE": "Resume Installation",
-  "DLG_RESUME_MESSAGE": "Previous installation was interrupted at \"{0}\". Resume from there?"
+  "DLG_RESUME_MESSAGE": "Previous installation was interrupted at \"{0}\". Resume from there?",
+
+  "DLG_HASH_MISMATCH_TITLE": "Hash Mismatch",
+  "DLG_HASH_MISMATCH_UPDATE_TITLE": "Update Hashes",
+  "DLG_HASH_MISMATCH_UPDATE_MESSAGE": "Would you like to update the mismatched hashes in modlist.yaml with the actual values?"
 }
