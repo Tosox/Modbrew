@@ -10,7 +10,8 @@ public class Patch extends Mod {
 	public Patch(@JsonProperty("id") String id,
 	             @JsonProperty("name") String name,
 	             @JsonProperty("url") String url,
+	             @JsonProperty("hash") String hash,
 	             @JsonProperty("setup") List<String> setup) {
-		super(id, EntryType.PATCH, name, url, setup);
+		super(id, EntryType.PATCH, name, url, hash, setup);
 	}
 }
