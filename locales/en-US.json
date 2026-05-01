@@ -36,6 +36,8 @@
 
   "DLG_RESUME_TITLE": "Resume Installation",
   "DLG_RESUME_MESSAGE": "Previous installation was interrupted at \"{0}\". Resume from there?",
+  "DLG_STALE_PROGRESS_TITLE": "Progress Discarded",
+  "DLG_STALE_PROGRESS_MESSAGE": "The saved progress file refers to a mod that no longer exists in the modlist. Press OK to start a full installation, or Cancel to abort.",
 
   "DLG_HASH_MISMATCH_TITLE": "Hash Mismatch",
   "DLG_HASH_MISMATCH_UPDATE_TITLE": "Update Hashes",
