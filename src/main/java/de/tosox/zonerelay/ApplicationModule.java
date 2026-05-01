@@ -83,7 +83,7 @@ public class ApplicationModule extends AbstractModule {
 	@Provides
 	@Singleton
 	LogManager provideLogManager(JTextPane outputPane, AppPaths paths, UserSettings settings) {
-		return new LogManager(outputPane, paths.getLogsDir(), settings.getLogLevel());
+		return new LogManager(outputPane, paths.getLogsDir(), settings.getLogLevel(), settings.getLogRetentionCount());
 	}
 
 	@Provides
