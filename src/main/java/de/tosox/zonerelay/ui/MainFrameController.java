@@ -17,6 +17,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Singleton
@@ -91,8 +92,12 @@ public class MainFrameController {
 			return;
 		}
 
-		String resumeFromId = promptForResume(config);
+		Optional<String> resumeResult = promptForResume(config);
+		if (resumeResult.isEmpty()) {
+			return;
+		}
 
+		String resumeFromId = resumeResult.get().isEmpty() ? null : resumeResult.get();
 		installCoordinator.startInstallation(config, mainFrame.isFullInstallSelected(), resumeFromId);
 	}
 
@@ -113,33 +118,46 @@ public class MainFrameController {
 		}
 	}
 
-	private String promptForResume(ModlistConfig config) {
+	private Optional<String> promptForResume(ModlistConfig config) {
 		if (!progressStore.hasSavedState()) {
-			return null;
+			return Optional.of("");
 		}
 
 		String savedId = progressStore.load();
 		if (savedId == null) {
-			return null;
+			return Optional.of("");
 		}
 
 		String entryName = findEntryNameById(config, savedId);
-		String displayName = (entryName != null) ? entryName : savedId;
+		if (entryName == null) {
+			int choice = JOptionPane.showConfirmDialog(
+					mainFrame,
+					localizer.translate("DLG_STALE_PROGRESS_MESSAGE"),
+					localizer.translate("DLG_STALE_PROGRESS_TITLE"),
+					JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.WARNING_MESSAGE
+			);
+			if (choice != JOptionPane.OK_OPTION) {
+				return Optional.empty();
+			}
+			progressStore.clear();
+			return Optional.of("");
+		}
 
 		int choice = JOptionPane.showConfirmDialog(
 				mainFrame,
-				localizer.translate("DLG_RESUME_MESSAGE", displayName),
+				localizer.translate("DLG_RESUME_MESSAGE", entryName),
 				localizer.translate("DLG_RESUME_TITLE"),
 				JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE
 		);
 
 		if (choice == JOptionPane.YES_OPTION) {
-			return savedId;
+			return Optional.of(savedId);
 		}
 
 		progressStore.clear();
-		return null;
+		return Optional.of("");
 	}
 
 	private String findEntryNameById(ModlistConfig config, String id) {
