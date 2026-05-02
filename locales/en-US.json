@@ -41,5 +41,10 @@
 
   "DLG_HASH_MISMATCH_TITLE": "Hash Mismatch",
   "DLG_HASH_MISMATCH_UPDATE_TITLE": "Update Hashes",
-  "DLG_HASH_MISMATCH_UPDATE_MESSAGE": "Would you like to update the mismatched hashes in modlist.yaml with the actual values?"
+  "DLG_HASH_MISMATCH_UPDATE_MESSAGE": "Would you like to update the mismatched hashes in modlist.yaml with the actual values?",
+
+  "MSG_SETUP_FAILURE_SUMMARY": "\nSetup path failures detected for the following mods:",
+  "DLG_SETUP_FAILURE_TITLE": "Setup Path Failure",
+  "DLG_SETUP_FAILURE_DESCRIPTION": "<html>Some setup paths were not found in the extracted archive.<br>Correct them below, or dismiss to leave affected mods as empty folders (red X in MO2).</html>",
+  "ERR_SETUP_PATH_BLANK": "The following paths must not be blank: {0}"
 }

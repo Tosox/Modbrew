@@ -8,10 +8,13 @@ import de.tosox.zonerelay.domain.model.HashMismatch;
 import de.tosox.zonerelay.domain.model.Mod;
 import de.tosox.zonerelay.domain.model.ModEntry;
 import de.tosox.zonerelay.domain.model.ModlistConfig;
+import de.tosox.zonerelay.domain.model.SetupFailure;
+import de.tosox.zonerelay.domain.model.SetupPathMissingException;
 import de.tosox.zonerelay.domain.port.*;
 import de.tosox.zonerelay.infrastructure.download.DownloadsManifestStore;
 import de.tosox.zonerelay.infrastructure.download.ManifestEntry;
 import de.tosox.zonerelay.infrastructure.persistence.ModlistHashUpdater;
+import de.tosox.zonerelay.infrastructure.persistence.ModlistSetupUpdater;
 import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.shared.config.ArchiveCleanupStrategy;
 import de.tosox.zonerelay.shared.config.UserSettings;
@@ -22,8 +25,10 @@ import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,6 +50,7 @@ public class InstallCoordinator {
 	private final UserSettings userSettings;
 	private final DownloadsManifestStore manifestStore;
 	private final ModlistHashUpdater modlistHashUpdater;
+	private final ModlistSetupUpdater modlistSetupUpdater;
 
 	private final AtomicBoolean isInstalling = new AtomicBoolean(false);
 
@@ -61,7 +67,7 @@ public class InstallCoordinator {
 	                          SplashImageCopier splashImageCopier, ShortcutCreator shortcutCreator,
 	                          InstallProgressStore progressStore, AppPaths paths,
 	                          UserSettings userSettings, DownloadsManifestStore manifestStore,
-	                          ModlistHashUpdater modlistHashUpdater) {
+	                          ModlistHashUpdater modlistHashUpdater, ModlistSetupUpdater modlistSetupUpdater) {
 		this.fileLogger = fileLogger;
 		this.uiLogger = uiLogger;
 		this.localizer = localizer;
@@ -75,6 +81,7 @@ public class InstallCoordinator {
 		this.userSettings = userSettings;
 		this.manifestStore = manifestStore;
 		this.modlistHashUpdater = modlistHashUpdater;
+		this.modlistSetupUpdater = modlistSetupUpdater;
 	}
 
 	public void startInstallation(ModlistConfig config, boolean fullInstall, String resumeFromId) {
@@ -105,13 +112,14 @@ public class InstallCoordinator {
 		AtomicInteger completedMods = new AtomicInteger(0);
 		AtomicBoolean resumePointFound = new AtomicBoolean(resumeFromId == null);
 		List<HashMismatch> hashMismatches = new ArrayList<>();
+		List<SetupFailure> setupFailures = new ArrayList<>();
 
 		uiLogger.info("\n=================================================================");
 		uiLogger.info(localizer.translate("MSG_STARTING_INSTALLATION"));
 		uiLogger.info("=================================================================");
-		installEntries(config.getMods(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches);
-		installEntries(config.getPatches(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches);
-		installEntries(config.getSeparators(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches);
+		installEntries(config.getMods(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches, setupFailures);
+		installEntries(config.getPatches(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches, setupFailures);
+		installEntries(config.getSeparators(), fullInstall, totalMods, completedMods, resumeFromId, resumePointFound, hashMismatches, setupFailures);
 
 		uiLogger.info("\n=================================================================");
 		uiLogger.info(localizer.translate("MSG_INSTALLATION_MO2_SETUP"));
@@ -129,6 +137,10 @@ public class InstallCoordinator {
 			presentHashMismatchSummary(hashMismatches);
 		}
 
+		if (!setupFailures.isEmpty()) {
+			presentSetupFailureSummary(setupFailures);
+		}
+
 		uiLogger.info(localizer.translate("MSG_COMPLETE_INSTALLATION"));
 		fileLogger.info("Installation completed successfully");
 
@@ -138,7 +150,7 @@ public class InstallCoordinator {
 	private void installEntries(List<? extends ModEntry> entries, boolean fullInstall,
 	                            int totalMods, AtomicInteger completedMods,
 	                            String resumeFromId, AtomicBoolean resumePointFound,
-	                            List<HashMismatch> hashMismatches) throws Exception {
+	                            List<HashMismatch> hashMismatches, List<SetupFailure> setupFailures) throws Exception {
 		if (entries == null || entries.isEmpty()) {
 			return;
 		}
@@ -186,7 +198,12 @@ public class InstallCoordinator {
 					}
 				}
 
-				findInstaller(entry).install(entry, archive, currentProgressListener);
+				try {
+					findInstaller(entry).install(entry, archive, currentProgressListener);
+				} catch (SetupPathMissingException e) {
+					setupFailures.add(new SetupFailure(mod.getName(), mod.getId(), e.getMissingPaths()));
+					fileLogger.warn("Setup path(s) missing for %s: %s", mod.getName(), e.getMissingPaths());
+				}
 
 				manifestStore.recordInstall(mod.getId(), result.computedHash());
 				applyArchiveCleanup(result, previousEntry);
@@ -250,6 +267,81 @@ public class InstallCoordinator {
 						.collect(Collectors.toMap(HashMismatch::modId, HashMismatch::actualHash));
 				new Thread(() -> modlistHashUpdater.updateHashes(paths.getModlistYaml(), updates),
 						"modlist-hash-update").start();
+			}
+		});
+	}
+
+	private void presentSetupFailureSummary(List<SetupFailure> failures) {
+		StringBuilder sb = new StringBuilder(localizer.translate("MSG_SETUP_FAILURE_SUMMARY"));
+		for (SetupFailure f : failures) {
+			sb.append("\n  ").append(f.modName()).append(":");
+			for (String path : f.invalidPaths()) {
+				sb.append("\n    ").append(path);
+			}
+		}
+		String logMessage = sb.toString();
+		uiLogger.warn(logMessage);
+		fileLogger.warn(logMessage);
+
+		SwingUtilities.invokeLater(() -> {
+			JPanel panel = new JPanel();
+			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+			JLabel description = new JLabel(localizer.translate("DLG_SETUP_FAILURE_DESCRIPTION"));
+			description.setAlignmentX(Component.LEFT_ALIGNMENT);
+			panel.add(description);
+
+			Map<String, Map<String, JTextField>> fieldMap = new LinkedHashMap<>();
+			for (SetupFailure f : failures) {
+				panel.add(Box.createVerticalStrut(10));
+
+				JLabel modHeader = new JLabel(f.modName());
+				modHeader.setFont(modHeader.getFont().deriveFont(Font.BOLD));
+				modHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+				panel.add(modHeader);
+
+				JPanel pathsPanel = new JPanel(new GridLayout(0, 2, 4, 2));
+				pathsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+				fieldMap.put(f.modId(), new LinkedHashMap<>());
+				for (String path : f.invalidPaths()) {
+					pathsPanel.add(new JLabel(path + ":"));
+					JTextField field = new JTextField(path, 40);
+					fieldMap.get(f.modId()).put(path, field);
+					pathsPanel.add(field);
+				}
+				panel.add(pathsPanel);
+			}
+
+			while (true) {
+				int choice = JOptionPane.showConfirmDialog(null, new JScrollPane(panel),
+						localizer.translate("DLG_SETUP_FAILURE_TITLE"),
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+				if (choice != JOptionPane.OK_OPTION) {
+					break;
+				}
+
+				List<String> blankFields = fieldMap.values().stream()
+						.flatMap(m -> m.entrySet().stream())
+						.filter(e -> e.getValue().getText().trim().isEmpty())
+						.map(Map.Entry::getKey)
+						.toList();
+
+				if (!blankFields.isEmpty()) {
+					JOptionPane.showMessageDialog(null,
+							localizer.translate("ERR_SETUP_PATH_BLANK", String.join(", ", blankFields)),
+							localizer.translate("DLG_SETUP_FAILURE_TITLE"), JOptionPane.ERROR_MESSAGE);
+					continue;
+				}
+
+				Map<String, Map<String, String>> corrections = new LinkedHashMap<>();
+				fieldMap.forEach((modId, pathFields) -> {
+					Map<String, String> modCorrections = new LinkedHashMap<>();
+					pathFields.forEach((oldPath, field) -> modCorrections.put(oldPath, field.getText().trim()));
+					corrections.put(modId, modCorrections);
+				});
+				new Thread(() -> modlistSetupUpdater.updateSetup(paths.getModlistYaml(), corrections),
+						"modlist-setup-update").start();
+				break;
 			}
 		});
 	}
