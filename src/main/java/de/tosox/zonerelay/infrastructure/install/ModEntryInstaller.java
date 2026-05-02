@@ -63,7 +63,7 @@ public class ModEntryInstaller implements ModInstaller {
 		if (mod.getType() == EntryType.MOD) {
 			targetDir = paths.getModsDir().resolve(mod.getName());
 			uiLogger.info(localizer.translate("MSG_ADDON_DELETE_OLD_VERSION"));
-			fileLogger.info("Deleting previous version in %s", targetDir);
+			fileLogger.info("Deleting previous version in %s", paths.relativize(targetDir));
 			FileUtils.deleteDirectory(targetDir.toFile());
 		} else {
 			targetDir = mo2ConfigReader.getGamePath();
@@ -73,8 +73,7 @@ public class ModEntryInstaller implements ModInstaller {
 		Files.createDirectories(tempDir);
 
 		try {
-			uiLogger.info(localizer.translate("MSG_EXTRACT_TO", tempDir));
-			fileLogger.info("Extracting %s to %s", archive.getPath(), tempDir);
+			uiLogger.info(localizer.translate("MSG_EXTRACT_TO", paths.relativize(tempDir)));
 			extractor.extract(archive, tempDir);
 
 			uiLogger.info(localizer.translate("MSG_READ_SETUP"));
@@ -101,14 +100,14 @@ public class ModEntryInstaller implements ModInstaller {
 				String instruction = setup.get(i);
 				SetupMapping mapping = resolveMapping(instruction, tempDir, targetDir);
 
-				uiLogger.info(localizer.translate("MSG_COPY_TO", mapping.source().getFileName(), mapping.destination()));
-				fileLogger.info("Copying %s → %s", mapping.source(), mapping.destination());
+				uiLogger.info(localizer.translate("MSG_COPY_TO", mapping.source().getFileName(), paths.relativize(mapping.destination())));
+				fileLogger.info("Copying %s → %s", paths.relativize(mapping.source()), paths.relativize(mapping.destination()));
 				copyEntry(mapping.source(), mapping.destination());
 
 				progressListener.onProgressUpdate(i + 1, total);
 			}
 		} finally {
-			fileLogger.info("Cleaning up temp dir: %s", tempDir);
+			fileLogger.info("Cleaning up temp dir: %s", paths.relativize(tempDir));
 			FileUtils.deleteDirectory(tempDir.toFile());
 		}
 

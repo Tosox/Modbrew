@@ -49,7 +49,7 @@ public class SeparatorInstaller implements ModInstaller {
 
 		Path modDir = paths.getModsDir().resolve(separator.getName() + "_separator");
 
-		uiLogger.info(localizer.translate("MSG_CREATE_SEPARATOR", modDir));
+		uiLogger.info(localizer.translate("MSG_CREATE_SEPARATOR", paths.relativize(modDir)));
 		fileLogger.info("Creating separator: %s", separator.getName());
 		Files.createDirectories(modDir);
 
