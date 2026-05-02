@@ -41,12 +41,14 @@ public class HttpArchiveDownloader implements ArchiveDownloader {
 	}
 
 	@Override
-	public DownloadResult download(String url, String modId, String declaredHash, File destination, ProgressListener listener) throws Exception {
+	public DownloadResult download(String url, String modId, String declaredHash, File destination, boolean fullInstall, ProgressListener listener) throws Exception {
 		ResolveResult resolved = resolveUrl(url);
 
-		Optional<DownloadResult> cached = tryServeFromCache(url, modId, declaredHash, destination, resolved);
-		if (cached.isPresent()) {
-			return cached.get();
+		if (!fullInstall) {
+			Optional<DownloadResult> cached = tryServeFromCache(url, modId, declaredHash, destination, resolved);
+			if (cached.isPresent()) {
+				return cached.get();
+			}
 		}
 
 		String filename = filenameResolver.resolve(resolved.url());
