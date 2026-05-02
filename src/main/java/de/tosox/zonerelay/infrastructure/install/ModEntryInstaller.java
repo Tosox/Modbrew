@@ -83,12 +83,11 @@ public class ModEntryInstaller implements ModInstaller {
 
 			for (int i = 0; i < total; i++) {
 				String instruction = setup.get(i);
-				Path source = tempDir.resolve(instruction);
-				Path destination = targetDir.resolve(source.getFileName());
+				SetupMapping mapping = resolveMapping(instruction, tempDir, targetDir);
 
-				uiLogger.info(localizer.translate("MSG_COPY_TO", instruction, source.getFileName()));
-				fileLogger.info("Copying %s → %s", source, destination);
-				FileUtils.copyDirectory(source.toFile(), destination.toFile());
+				uiLogger.info(localizer.translate("MSG_COPY_TO", mapping.source().getFileName(), mapping.destination()));
+				fileLogger.info("Copying %s → %s", mapping.source(), mapping.destination());
+				copyEntry(mapping.source(), mapping.destination());
 
 				progressListener.onProgressUpdate(i + 1, total);
 			}
@@ -103,4 +102,36 @@ public class ModEntryInstaller implements ModInstaller {
 		}
 		progressListener.onProgressUpdate(1, 1);
 	}
+
+	private SetupMapping resolveMapping(String instruction, Path tempDir, Path targetDir) {
+		if (instruction.contains("->")) {
+			String[] parts = instruction.split("->", 2);
+			Path source = tempDir.resolve(parts[0].trim());
+			String dstPart = parts[1].trim();
+			Path dstBase = targetDir.resolve(dstPart);
+
+			Path destination;
+			if (Files.isDirectory(source) || !FilenameUtils.getExtension(dstPart).isEmpty()) {
+				destination = dstBase;
+			} else {
+				destination = dstBase.resolve(source.getFileName());
+			}
+
+			return new SetupMapping(source, destination);
+		}
+
+		Path source = tempDir.resolve(instruction);
+		return new SetupMapping(source, targetDir.resolve(source.getFileName()));
+	}
+
+	private void copyEntry(Path source, Path destination) throws Exception {
+		if (Files.isDirectory(source)) {
+			FileUtils.copyDirectory(source.toFile(), destination.toFile());
+		} else {
+			Files.createDirectories(destination.getParent());
+			FileUtils.copyFile(source.toFile(), destination.toFile());
+		}
+	}
+
+	private record SetupMapping(Path source, Path destination) {}
 }
