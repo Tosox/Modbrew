@@ -31,9 +31,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class InstallCoordinator {
@@ -51,6 +53,7 @@ public class InstallCoordinator {
 	private final DownloadsManifestStore manifestStore;
 	private final ModlistHashUpdater modlistHashUpdater;
 	private final ModlistSetupUpdater modlistSetupUpdater;
+	private final ModlistRepository modlistRepository;
 
 	private final AtomicBoolean isInstalling = new AtomicBoolean(false);
 
@@ -67,7 +70,8 @@ public class InstallCoordinator {
 	                          SplashImageCopier splashImageCopier, ShortcutCreator shortcutCreator,
 	                          InstallProgressStore progressStore, AppPaths paths,
 	                          UserSettings userSettings, DownloadsManifestStore manifestStore,
-	                          ModlistHashUpdater modlistHashUpdater, ModlistSetupUpdater modlistSetupUpdater) {
+	                          ModlistHashUpdater modlistHashUpdater, ModlistSetupUpdater modlistSetupUpdater,
+	                          ModlistRepository modlistRepository) {
 		this.fileLogger = fileLogger;
 		this.uiLogger = uiLogger;
 		this.localizer = localizer;
@@ -82,6 +86,7 @@ public class InstallCoordinator {
 		this.manifestStore = manifestStore;
 		this.modlistHashUpdater = modlistHashUpdater;
 		this.modlistSetupUpdater = modlistSetupUpdater;
+		this.modlistRepository = modlistRepository;
 	}
 
 	public void startInstallation(ModlistConfig config, boolean fullInstall, String resumeFromId) {
@@ -200,12 +205,11 @@ public class InstallCoordinator {
 
 				try {
 					findInstaller(entry).install(entry, archive, currentProgressListener);
+					manifestStore.recordInstall(mod.getId(), result.computedHash());
 				} catch (SetupPathMissingException e) {
 					setupFailures.add(new SetupFailure(mod.getName(), mod.getId(), e.getMissingPaths()));
 					fileLogger.warn("Setup path(s) missing for %s: %s", mod.getName(), e.getMissingPaths());
 				}
-
-				manifestStore.recordInstall(mod.getId(), result.computedHash());
 				applyArchiveCleanup(result, previousEntry);
 			} else {
 				findInstaller(entry).install(entry, null, currentProgressListener);
@@ -339,11 +343,40 @@ public class InstallCoordinator {
 					pathFields.forEach((oldPath, field) -> modCorrections.put(oldPath, field.getText().trim()));
 					corrections.put(modId, modCorrections);
 				});
-				new Thread(() -> modlistSetupUpdater.updateSetup(paths.getModlistYaml(), corrections),
-						"modlist-setup-update").start();
+				new Thread(() -> {
+						modlistSetupUpdater.updateSetup(paths.getModlistYaml(), corrections);
+						retrySetupFailures(failures);
+					}, "modlist-setup-update").start();
 				break;
 			}
 		});
+	}
+
+	private void retrySetupFailures(List<SetupFailure> failures) {
+		try {
+			ModlistConfig updated = modlistRepository.load(paths.getModlistYaml());
+			Set<String> failedIds = failures.stream()
+					.map(SetupFailure::modId)
+					.collect(Collectors.toSet());
+
+			Stream.concat(updated.getMods().stream(), updated.getPatches().stream())
+					.filter(mod -> failedIds.contains(mod.getId()))
+					.forEach(mod -> {
+						uiLogger.info(localizer.translate("MSG_TITLE_CONFIGENTRY", mod.getName()));
+						fileLogger.info("Retrying setup for: %s", mod.getId());
+						try {
+							DownloadResult result = archiveDownloader.download(
+									mod.getUrl(), mod.getId(), mod.getHash(),
+									paths.getDownloadsDir().toFile(), false, currentProgressListener);
+							findInstaller(mod).install(mod, result.archive(), currentProgressListener);
+							manifestStore.recordInstall(mod.getId(), result.computedHash());
+						} catch (Exception e) {
+							fileLogger.error("Retry failed for %s: %s", mod.getName(), e.getMessage());
+						}
+					});
+		} catch (Exception e) {
+			fileLogger.error("Failed to retry setup failures: %s", e.getMessage());
+		}
 	}
 
 	private void setupMo2Environment(ModlistConfig config) {
