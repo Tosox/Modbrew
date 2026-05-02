@@ -82,7 +82,7 @@ public class HttpArchiveDownloader implements ArchiveDownloader {
 		String computedHash = HashUtils.md5(archive);
 		manifestStore.recordDownload(modId, url, filename);
 
-		logger.info("Downloaded to %s", archive.getPath());
+		logger.info("Downloaded to %s", archive.getName());
 		return new DownloadResult(archive, computedHash);
 	}
 
@@ -101,16 +101,16 @@ public class HttpArchiveDownloader implements ArchiveDownloader {
 		if (resolved.hasHash()) {
 			String installedHash = cached.installedHash();
 			if (installedHash != null && installedHash.equalsIgnoreCase(resolved.hash())) {
-				logger.info("Archive unchanged on server (scraped hash match), skipping: %s", cachedArchive.getPath());
+				logger.info("Archive unchanged on server (scraped hash match), skipping: %s", cachedArchive.getName());
 				return Optional.of(new DownloadResult(cachedArchive, installedHash));
 			}
 		} else if (declaredHash != null) {
 			String cachedFileHash = HashUtils.md5(cachedArchive);
 			if (declaredHash.equalsIgnoreCase(cachedFileHash)) {
-				logger.info("Archive already downloaded (declared hash match), skipping: %s", cachedArchive.getPath());
+				logger.info("Archive already downloaded (declared hash match), skipping: %s", cachedArchive.getName());
 				return Optional.of(new DownloadResult(cachedArchive, cachedFileHash));
 			}
-			logger.info("Cached archive does not match declared hash, re-downloading: %s", cachedArchive.getPath());
+			logger.info("Cached archive does not match declared hash, re-downloading: %s", cachedArchive.getName());
 		}
 
 		return Optional.empty();

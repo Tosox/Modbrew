@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
+import de.tosox.zonerelay.shared.config.AppPaths;
 import de.tosox.zonerelay.ui.CrashHandler;
 import de.tosox.zonerelay.ui.MainFrame;
 import de.tosox.zonerelay.shared.i18n.Localizer;
@@ -21,9 +22,12 @@ public class Application {
 
 		this.mainFrame = injector.getInstance(MainFrame.class);
 
+		Logger fileLogger = injector.getInstance(Key.get(Logger.class, Names.named("file")));
 		Logger uiLogger = injector.getInstance(Key.get(Logger.class, Names.named("ui")));
 		Localizer localizer = injector.getInstance(Localizer.class);
+		AppPaths paths = injector.getInstance(AppPaths.class);
 
+		fileLogger.info("Working directory: %s", paths.getBase());
 		uiLogger.info(localizer.translate("MSG_WELCOME_MESSAGE", BuildInfo.APP_NAME));
 		uiLogger.info("-------------------------------------------------------------------\n");
 	}

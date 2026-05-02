@@ -16,17 +16,19 @@ import java.nio.file.Path;
 @Singleton
 public class SevenZipExtractor implements ArchiveExtractor {
 	private final Logger logger;
+	private final AppPaths paths;
 	private final String sevenZipPath;
 
 	@Inject
 	public SevenZipExtractor(@Named("file") Logger logger, AppPaths paths) {
 		this.logger = logger;
+		this.paths = paths;
 		this.sevenZipPath = paths.getSevenZipExe().toString();
 	}
 
 	@Override
 	public void extract(File archive, Path destination) throws Exception {
-		logger.info("Extracting %s to %s", archive.getPath(), destination);
+		logger.info("Extracting %s to %s", paths.relativize(archive.toPath()), paths.relativize(destination));
 
 		Process extractProcess = new ProcessBuilder(
 				sevenZipPath, "-bso0", "x", archive.getPath(), "-o" + destination.toString(), "-y")

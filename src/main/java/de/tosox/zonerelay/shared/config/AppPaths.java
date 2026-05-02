@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 @Getter
 public final class AppPaths {
+	private final Path base;
 	private final Path mo2Dir;
 	private final Path modsDir;
 	private final Path profilesDir;
@@ -27,6 +28,7 @@ public final class AppPaths {
 	private final Path userConfig;
 
 	private AppPaths(Path base) {
+		this.base = base;
 		mo2Dir = base.resolve("../").normalize();
 		modsDir = mo2Dir.resolve("mods");
 		profilesDir = mo2Dir.resolve("profiles");
@@ -46,6 +48,14 @@ public final class AppPaths {
 		logsDir = base.resolve("logs");
 		progressFile = base.resolve("install_progress.dat");
 		userConfig = base.resolve("user_config.yaml");
+	}
+
+	public Path relativize(Path path) {
+		try {
+			return base.relativize(path.toAbsolutePath().normalize());
+		} catch (IllegalArgumentException e) {
+			return path;
+		}
 	}
 
 	public static AppPaths fromBase(Path baseDir) {
