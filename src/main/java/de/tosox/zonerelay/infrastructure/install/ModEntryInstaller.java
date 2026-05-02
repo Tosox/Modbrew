@@ -6,6 +6,7 @@ import de.tosox.zonerelay.infrastructure.mo2.Mo2ConfigReader;
 import de.tosox.zonerelay.domain.model.EntryType;
 import de.tosox.zonerelay.domain.model.Mod;
 import de.tosox.zonerelay.domain.model.ModEntry;
+import de.tosox.zonerelay.domain.model.SetupPathMissingException;
 import de.tosox.zonerelay.domain.port.ArchiveExtractor;
 import de.tosox.zonerelay.domain.port.MetaIniWriter;
 import de.tosox.zonerelay.domain.port.ModInstaller;
@@ -20,6 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -80,6 +82,20 @@ public class ModEntryInstaller implements ModInstaller {
 
 			List<String> setup = mod.getSetup();
 			int total = setup.size();
+
+			List<String> missingPaths = new ArrayList<>();
+			for (String instruction : setup) {
+				SetupMapping mapping = resolveMapping(instruction, tempDir, targetDir);
+				if (!Files.exists(mapping.source())) {
+					missingPaths.add(instruction);
+				}
+			}
+			if (!missingPaths.isEmpty()) {
+				if (mod.getType() == EntryType.MOD) {
+					Files.createDirectories(targetDir);
+				}
+				throw new SetupPathMissingException(missingPaths);
+			}
 
 			for (int i = 0; i < total; i++) {
 				String instruction = setup.get(i);
