@@ -18,12 +18,14 @@ import java.time.LocalDate;
 @Singleton
 public class IniMetaWriter implements MetaIniWriter {
 	private final Logger logger;
+	private final AppPaths paths;
 	private final String addonMetaTemplate;
 	private final String separatorMetaTemplate;
 
 	@Inject
 	public IniMetaWriter(@Named("file") Logger logger, AppPaths paths) throws IOException {
 		this.logger = logger;
+		this.paths = paths;
 		this.addonMetaTemplate = Files.readString(paths.getAddonMetaTemplate());
 		this.separatorMetaTemplate = Files.readString(paths.getSeparatorMetaTemplate());
 	}
@@ -49,6 +51,6 @@ public class IniMetaWriter implements MetaIniWriter {
 		Files.createDirectories(targetDir);
 		Files.writeString(targetDir.resolve("meta.ini"), content);
 
-		logger.info("Generated meta.ini in %s", targetDir);
+		logger.info("Generated meta.ini in %s", paths.relativize(targetDir));
 	}
 }
