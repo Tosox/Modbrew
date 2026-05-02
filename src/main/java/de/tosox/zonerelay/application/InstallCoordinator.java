@@ -175,11 +175,11 @@ public class InstallCoordinator {
 				ManifestEntry previousEntry = manifestStore.getManifest().getEntry(mod.getId());
 
 				DownloadResult result = archiveDownloader.download(mod.getUrl(), mod.getId(), mod.getHash(),
-						paths.getDownloadsDir().toFile(), currentProgressListener);
+						paths.getDownloadsDir().toFile(), fullInstall, currentProgressListener);
 				archive = result.archive();
 
 				String installedHash = previousEntry != null ? previousEntry.installedHash() : null;
-				if (installedHash != null && installedHash.equalsIgnoreCase(result.computedHash())) {
+				if (!fullInstall && installedHash != null && installedHash.equalsIgnoreCase(result.computedHash())) {
 					uiLogger.info(localizer.translate("MSG_ADDON_ALREADY_UP_TO_DATE"));
 					fileLogger.info("Installed hash matches archive, skipping reinstall: %s", mod.getId());
 					if (entry.getType() != EntryType.SEPARATOR) {
