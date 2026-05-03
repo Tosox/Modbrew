@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.tosox</groupId>
-    <artifactId>zonerelay</artifactId>
+    <artifactId>modbrew</artifactId>
     <version>0.1.0</version>
-    <name>ZoneRelay</name>
+    <name>Modbrew</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -96,7 +96,7 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>de.tosox.zonerelay.Main</mainClass>
+                                    <mainClass>de.tosox.modbrew.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -120,7 +120,7 @@
                             <outfile>target/${project.name}-v${project.version}.exe</outfile>
                             <dontWrapJar>false</dontWrapJar>
                             <classPath>
-                                <mainClass>de.tosox.zonerelay.Main</mainClass>
+                                <mainClass>de.tosox.modbrew.Main</mainClass>
                             </classPath>
                             <jre>
                                 <requiresJdk>true</requiresJdk>

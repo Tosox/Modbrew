@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Copy Resources" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="$res = &quot;./data&quot;, &quot;./locales&quot;, &quot;./resources&quot;, &quot;./target/*.exe&quot;; $res | Foreach-Object { Copy-Item -Path $_ -Destination &quot;D:\MO2 VIP\.ZoneRelay\&quot; -Recurse -Force }" />
+    <option name="SCRIPT_TEXT" value="$res = &quot;./data&quot;, &quot;./locales&quot;, &quot;./resources&quot;, &quot;./target/*.exe&quot;; $res | Foreach-Object { Copy-Item -Path $_ -Destination &quot;D:\MO2 VIP\.Modbrew\&quot; -Recurse -Force }" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
