@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Build &amp; Copy &amp; Run" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="Start-Process -FilePath &quot;D:\MO2 VIP\.ZoneRelay\*.exe&quot; -WorkingDirectory &quot;D:\MO2 VIP\.ZoneRelay&quot;" />
+    <option name="SCRIPT_TEXT" value="Start-Process -FilePath &quot;D:\MO2 VIP\.Modbrew\*.exe&quot; -WorkingDirectory &quot;D:\MO2 VIP\.Modbrew&quot;" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

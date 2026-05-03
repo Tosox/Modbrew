@@ -1,0 +1,9 @@
+package de.tosox.modbrew.domain.port;
+
+import de.tosox.modbrew.shared.progress.ProgressListener;
+
+import java.io.File;
+
+public interface ArchiveDownloader {
+	DownloadResult download(String url, String modId, String declaredHash, File destination, boolean fullInstall, ProgressListener listener) throws Exception;
+}

@@ -30,7 +30,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: zone-relay
+          name: modbrew
           path: artifact
 
       - name: Copy files
@@ -42,7 +42,7 @@ jobs:
           cp -a resources/ release
 
       - name: Create archive
-        run: zip -r ZoneRelay-${{ inputs.build-ver }}.zip .
+        run: zip -r Modbrew-${{ inputs.build-ver }}.zip .
         working-directory: release
 
       - name: Create release
@@ -52,4 +52,4 @@ jobs:
           name: ${{ inputs.build-ver }}
           body_path: ./CHANGELOG.md
           prerelease: false
-          files: release/ZoneRelay-${{ inputs.build-ver }}.zip
+          files: release/Modbrew-${{ inputs.build-ver }}.zip

@@ -1,6 +1,6 @@
 {
   "GUI_INSTALLER_VERSION": "Installer version: {0}",
-  "GUI_INSTALL": "Install",
+  "GUI_INSTALL": ">>> Brew <<<",
   "GUI_FULL_INSTALLATION": "Full installation",
   "GUI_LAUNCH_MO2": "Launch",
   "GUI_CURRENT_PROGRESS": "Current progress",
@@ -8,9 +8,9 @@
   "GUI_DOWNLOADING": "Downloading...",
 
   "MSG_WELCOME_MESSAGE": "Welcome to {0}",
-  "MSG_STARTING_INSTALLATION": "Starting installation",
-  "MSG_COMPLETE_INSTALLATION": "\nInstallation complete. You can now launch the MO2 instance of the modpack from the desktop",
-  "MSG_READ_MODLIST_CFG": "Reading mod list configuration",
+  "MSG_STARTING_BREW": "Starting brew",
+  "MSG_COMPLETE_BREW": "\nBrew complete. You can now launch the MO2 instance of the modpack from the desktop",
+  "MSG_READ_BREWFILE_CFG": "Reading brewfile configuration",
   "MSG_TITLE_CONFIGENTRY": "\n_______________ {0} _______________",
   "MSG_CREATE_SEPARATOR": "    Creating separator in {0}",
   "MSG_GENERATE_META": "    Generating meta.ini file",
@@ -18,7 +18,7 @@
   "MSG_ADDON_ALREADY_UP_TO_DATE": "    Installed version matches archive — skipping reinstall",
   "MSG_HASH_MISMATCH_SUMMARY": "\nHash mismatches detected for the following mods:",
   "MSG_HASH_MISMATCH_ENTRY": "  {0}: expected {1}, got {2}",
-  "MSG_READ_SETUP" : "    Reading setup instructions",
+  "MSG_READ_RECIPE": "    Reading recipe",
   "MSG_COPY_TO": "        Copying {0} ==> {1}",
   "MSG_COPY": "    Copying {0}",
   "MSG_EXTRACT_TO": "    Extracting to {0}",
@@ -26,25 +26,24 @@
   "MSG_INSTALLATION_CLEANUP": "    Cleaning Workspace",
   "MSG_CREATE_CUSTOM_PROFILE": "    Creating custom MO2 profile",
   "MSG_CREATE_SHORTCUT": "    Creating shortcut to the modpack MO2 instance on the desktop",
+  "MSG_SETUP_FAILURE_SUMMARY": "\nRecipe path failures detected for the following mods:",
 
   "ERR_INVALID_INSTALL_DIR": "Please move the installer into the MO2 directory",
   "ERR_LAUNCH_MO2_FAIL": "An error occurred while trying to run MO2",
   "ERR_LAUNCH_MO2": "Please launch MO2 once first",
-  "ERR_ALREADY_INSTALLING": "Installation already in progress",
-  "ERR_CONFIG_INVALID": "Failed to load or validate the modlist configuration",
-  "ERR_INSTALLATION_FAILED": "An error occurred during installation: {0}",
+  "ERR_ALREADY_BREWING": "Brew already in progress",
+  "ERR_CONFIG_INVALID": "Failed to load or validate the brewfile configuration",
+  "ERR_INSTALLATION_FAILED": "An error occurred during brew: {0}",
+  "ERR_SETUP_PATH_BLANK": "The following paths must not be blank: {0}",
 
-  "DLG_RESUME_TITLE": "Resume Installation",
-  "DLG_RESUME_MESSAGE": "Previous installation was interrupted at \"{0}\". Resume from there?",
+  "DLG_RESUME_TITLE": "Resume Brew",
+  "DLG_RESUME_MESSAGE": "Previous brew was interrupted at \"{0}\". Resume from there?",
   "DLG_STALE_PROGRESS_TITLE": "Progress Discarded",
-  "DLG_STALE_PROGRESS_MESSAGE": "The saved progress file refers to a mod that no longer exists in the modlist. Press OK to start a full installation, or Cancel to abort.",
+  "DLG_STALE_PROGRESS_MESSAGE": "The saved progress file refers to a mod that no longer exists in the brewfile. Press OK to start a full brew, or Cancel to abort.",
 
   "DLG_HASH_MISMATCH_TITLE": "Hash Mismatch",
   "DLG_HASH_MISMATCH_UPDATE_TITLE": "Update Hashes",
-  "DLG_HASH_MISMATCH_UPDATE_MESSAGE": "Would you like to update the mismatched hashes in modlist.yaml with the actual values?",
-
-  "MSG_SETUP_FAILURE_SUMMARY": "\nSetup path failures detected for the following mods:",
-  "DLG_SETUP_FAILURE_TITLE": "Setup Path Failure",
-  "DLG_SETUP_FAILURE_DESCRIPTION": "<html>Some setup paths were not found in the extracted archive.<br>Correct them below, or dismiss to leave affected mods as empty folders (red X in MO2).</html>",
-  "ERR_SETUP_PATH_BLANK": "The following paths must not be blank: {0}"
+  "DLG_HASH_MISMATCH_UPDATE_MESSAGE": "Would you like to update the mismatched hashes in modbrew.yaml with the actual values?",
+  "DLG_SETUP_FAILURE_TITLE": "Recipe Path Failure",
+  "DLG_SETUP_FAILURE_DESCRIPTION": "<html>Some recipe paths were not found in the extracted archive.<br>Correct them below, or dismiss to leave affected mods as empty folders (red X in MO2).</html>"
 }
